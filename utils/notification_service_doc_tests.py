@@ -173,7 +173,7 @@ class Message:
         return json.dumps(blocks)
 
     @staticmethod
-    def error_out():
+    def error_out(fake_slack_api_token: str = None):
         payload = [
             {
                 "type": "section",
@@ -189,6 +189,8 @@ class Message:
             }
         ]
 
+                # Simulate missing or empty SLACK_API_TOKEN
+        os.environ['SLACK_API_TOKEN'] = fake_slack_api_token or ''
         print("Sending the following payload")
         print(json.dumps({"blocks": json.loads(payload)}))
 
