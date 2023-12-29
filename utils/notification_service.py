@@ -694,6 +694,7 @@ def retrieve_artifact(artifact_path: str, gpu: Optional[str]):
 
 
 def retrieve_available_artifacts():
+    artifact_prefixes = ['single-gpu', 'multi-gpu']
     class Artifact:
         def __init__(self, name: str, single_gpu: bool = False, multi_gpu: bool = False):
             self.name = name
@@ -717,15 +718,20 @@ def retrieve_available_artifacts():
         if len(name_parts) > 1:
             artifact_name = name_parts[0]
 
-        if artifact_name.startswith("single-gpu"):
-            artifact_name = artifact_name[len("single-gpu") + 1 :]
+        if any(artifact_name.startswith(prefix) for prefix in artifact_prefixes):
+            # Determine the prefix length, if it exists
+            prefix_length = next((len(prefix) + 1 for prefix in artifact_prefixes if artifact_name.startswith(prefix)), 0)
+            # Extract the base artifact name by slicing off the prefix
+            artifact_name = artifact_name[prefix_length:]
 
             if artifact_name in _available_artifacts:
                 _available_artifacts[artifact_name].single_gpu = True
             else:
                 _available_artifacts[artifact_name] = Artifact(artifact_name, single_gpu=True)
 
-            _available_artifacts[artifact_name].add_path(directory, gpu="single")
+            # Identify GPU type based on the directory name
+            gpu_type = 'single' if 'single-gpu' in directory else 'multi' if 'multi-gpu' in directory else None
+            _available_artifacts[artifact_name].add_path(directory, gpu=gpu_type)
 
         elif artifact_name.startswith("multi-gpu"):
             artifact_name = artifact_name[len("multi-gpu") + 1 :]
