@@ -564,6 +564,11 @@ class Message:
         print("Sending the following payload")
         print(json.dumps({"blocks": blocks}))
 
+        slack_api_token = os.environ.get('SLACK_API_TOKEN')
+        if slack_api_token is None or slack_api_token.strip() == '':
+            print('Error: SLACK_API_TOKEN environment variable is not set.')
+            return
+
         client.chat_postMessage(
             channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
             text=text,
@@ -642,6 +647,14 @@ class Message:
                     print("Sending the following reply")
                     print(json.dumps({"blocks": blocks}))
 
+                    slack_api_token = os.environ.get('SLACK_API_TOKEN')
+                    if slack_api_token is None or slack_api_token.strip() == '':
+                        print('Error: SLACK_API_TOKEN environment variable is not set.')
+                        return
+                    slack_api_token = os.environ.get('SLACK_API_TOKEN')
+                    if slack_api_token is None or slack_api_token.strip() == '':
+                        print('Error: SLACK_API_TOKEN environment variable is not set.')
+                        return
                     client.chat_postMessage(
                         channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
                         text=f"Results for {job}",
