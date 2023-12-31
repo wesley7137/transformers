@@ -577,11 +577,16 @@ class Message:
 
         text = f"{self.n_failures} failures out of {self.n_tests} tests," if self.n_failures else "All tests passed."
 
-        self.thread_ts = client.chat_postMessage(
-            channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
-            blocks=payload,
-            text=text,
-        )
+        try:
+            self.thread_ts = client.chat_postMessage(
+                channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
+                blocks=payload,
+                text=text,
+            )
+        except Exception as e:
+            print(f"Error sending message to Slack: {str(e)}")
+            if 'not_authed' in str(e):
+                print("Please check the Slack API token.")
 
     def get_reply_blocks(self, job_name, job_result, failures, device, text):
         """
@@ -628,7 +633,6 @@ class Message:
     def post_reply(self):
         if self.thread_ts is None:
             raise ValueError("Can only post reply if a post has been made.")
-
         sorted_dict = sorted(self.model_results.items(), key=lambda t: t[0])
         for job, job_result in sorted_dict:
             if len(job_result["failures"]):
@@ -642,12 +646,17 @@ class Message:
                     print("Sending the following reply")
                     print(json.dumps({"blocks": blocks}))
 
-                    client.chat_postMessage(
-                        channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
-                        text=f"Results for {job}",
-                        blocks=blocks,
-                        thread_ts=self.thread_ts["ts"],
-                    )
+                    try:
+                        client.chat_postMessage(
+                            channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
+                            text=f"Results for {job}",
+                            blocks=blocks,
+                            thread_ts=self.thread_ts["ts"],
+                        )
+                    except Exception as e:
+                        print(f"Error sending message to Slack: {str(e)}")
+                        if 'not_authed' in str(e):
+                            print("Please check the Slack API token.")
 
                     time.sleep(1)
 
@@ -665,12 +674,17 @@ class Message:
                     print("Sending the following reply")
                     print(json.dumps({"blocks": blocks}))
 
-                    client.chat_postMessage(
-                        channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
-                        text=f"Results for {job}",
-                        blocks=blocks,
-                        thread_ts=self.thread_ts["ts"],
-                    )
+                    try:
+                        client.chat_postMessage(
+                            channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
+                            text=f"Results for {job}",
+                            blocks=blocks,
+                            thread_ts=self.thread_ts["ts"],
+                        )
+                    except Exception as e:
+                        print(f"Error sending message to Slack: {str(e)}")
+                        if 'not_authed' in str(e):
+                            print("Please check the Slack API token.")
 
                     time.sleep(1)
 
@@ -691,8 +705,6 @@ def retrieve_artifact(artifact_path: str, gpu: Optional[str]):
                 raise ValueError(f"Could not open {os.path.join(artifact_path, file)}.") from e
 
     return _artifact
-
-
 def retrieve_available_artifacts():
     class Artifact:
         def __init__(self, name: str, single_gpu: bool = False, multi_gpu: bool = False):
