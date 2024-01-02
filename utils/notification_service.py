@@ -509,7 +509,7 @@ class Message:
         return json.dumps(blocks)
 
     @staticmethod
-    def error_out(title, ci_title="", runner_not_available=False, runner_failed=False, setup_failed=False):
+    def error_out(title, ci_title="", runner_not_available=False, runner_failed=False, setup_failed=False, specific_error_message=None):
         blocks = []
         title_block = {"type": "header", "text": {"type": "plain_text", "text": title}}
         blocks.append(title_block)
@@ -530,7 +530,7 @@ class Message:
             text = "💔 Setup job failed. Tests are not run. 😭"
         else:
             text = "💔 There was an issue running the tests. 😭"
-
+            text += specific_error_message or ""
         error_block_1 = {
             "type": "header",
             "text": {
