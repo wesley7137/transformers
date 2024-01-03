@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import collections
+import sys
 import json
 import math
 import os
@@ -347,7 +348,12 @@ if __name__ == "__main__":
     # Link to the GitHub Action job
     doc_test_results["job_link"] = github_actions_job_links.get("run_doctests")
 
-    artifact_path = available_artifacts["doc_tests_gpu_test_reports"].paths[0]
+    try:
+        artifact_path = available_artifacts["doc_tests_gpu_test_reports"].paths[0]
+    except KeyError:
+        print("Error: The directory 'doc_tests_gpu_test_reports' is not present in the current location.")
+        print("Please ensure that the script is run from the correct location.")
+        sys.exit(1)
     artifact = retrieve_artifact(artifact_path["name"])
     if "stats" in artifact:
         failed, success, time_spent = handle_test_results(artifact["stats"])
