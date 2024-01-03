@@ -564,6 +564,10 @@ class Message:
         print("Sending the following payload")
         print(json.dumps({"blocks": blocks}))
 
+        token = os.environ.get('CI_SLACK_BOT_TOKEN')
+        if not token or token == 'invalid':
+            raise ValueError('Slack API token is missing or not valid.')
+
         client.chat_postMessage(
             channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
             text=text,
