@@ -717,8 +717,8 @@ def retrieve_available_artifacts():
         if len(name_parts) > 1:
             artifact_name = name_parts[0]
 
-        if artifact_name.startswith("single-gpu"):
-            artifact_name = artifact_name[len("single-gpu") + 1 :]
+        if artifact_name.startswith("run_all_tests_gpu_"):
+            artifact_name = artifact_name[len("run_all_tests_gpu_") :]
 
             if artifact_name in _available_artifacts:
                 _available_artifacts[artifact_name].single_gpu = True
