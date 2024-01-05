@@ -22,7 +22,10 @@ from fnmatch import fnmatch
 from typing import Dict
 
 import requests
+import subprocess
 from slack_sdk import WebClient
+import subprocess
+subprocess.run(["pip", "install", "slack_sdk==3.26.1"])
 
 
 client = WebClient(token=os.environ["CI_SLACK_BOT_TOKEN"])
