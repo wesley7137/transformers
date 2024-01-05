@@ -509,7 +509,7 @@ class Message:
         return json.dumps(blocks)
 
     @staticmethod
-    def error_out(title, ci_title="", runner_not_available=False, runner_failed=False, setup_failed=False):
+    def error_out(title, ci_title="", runner_not_available=False, runner_failed=False, setup_failed=False, token=None):
         blocks = []
         title_block = {"type": "header", "text": {"type": "plain_text", "text": title}}
         blocks.append(title_block)
@@ -564,10 +564,13 @@ class Message:
         print("Sending the following payload")
         print(json.dumps({"blocks": blocks}))
 
+        if not token:
+            raise ValueError("Slack API token is missing.")
         client.chat_postMessage(
             channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
             text=text,
             blocks=payload,
+            token=token,
         )
 
     def post(self):
