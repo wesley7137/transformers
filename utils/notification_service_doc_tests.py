@@ -173,7 +173,9 @@ class Message:
         return json.dumps(blocks)
 
     @staticmethod
-    def error_out():
+    def error_out(token=None):
+        if not token:
+            raise ValueError("Slack API token is missing.")
         payload = [
             {
                 "type": "section",
@@ -193,12 +195,15 @@ class Message:
         print(json.dumps({"blocks": json.loads(payload)}))
 
         client.chat_postMessage(
+            token=token,
             channel=os.environ["CI_SLACK_CHANNEL_ID_DAILY"],
             text="There was an issue running the tests.",
             blocks=payload,
         )
 
-    def post(self):
+    def post(self, token=None):
+        if not token:
+            raise ValueError("Slack API token is missing.")
         print("Sending the following payload")
         print(json.dumps({"blocks": json.loads(self.payload)}))
 
@@ -208,6 +213,7 @@ class Message:
             channel=os.environ["CI_SLACK_CHANNEL_ID_DAILY"],
             blocks=self.payload,
             text=text,
+            token=token,
         )
 
     def get_reply_blocks(self, job_name, job_link, failures, text):
