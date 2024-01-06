@@ -172,8 +172,9 @@ class Message:
 
         return json.dumps(blocks)
 
-    @staticmethod
-    def error_out():
+    @classmethod
+    @classmethod
+    def error_out(cls):
         payload = [
             {
                 "type": "section",
