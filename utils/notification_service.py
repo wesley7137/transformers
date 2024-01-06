@@ -19,6 +19,7 @@ import json
 import operator
 import os
 import re
+# !/usr/bin/env python3
 import sys
 import time
 from typing import Dict, List, Optional, Union
@@ -519,6 +520,7 @@ class Message:
             blocks.append(ci_title_block)
 
         offline_runners = []
+        offline_runners = []
         if runner_not_available:
             text = "💔 CI runners are not available! Tests are not run. 😭"
             result = os.environ.get("OFFLINE_RUNNERS")
@@ -529,7 +531,7 @@ class Message:
         elif setup_failed:
             text = "💔 Setup job failed. Tests are not run. 😭"
         else:
-            text = "💔 There was an issue running the tests. 😭"
+            text = "💔 There was an issue while running the tests because of the missing `--token` parameter. 😭"
 
         error_block_1 = {
             "type": "header",
@@ -539,7 +541,7 @@ class Message:
             },
         }
 
-        text = ""
+        text = "🙏 Let's fix it ASAP! 🙏"
         if len(offline_runners) > 0:
             text = "\n  • " + "\n  • ".join(offline_runners)
             text = f"The following runners are offline:\n{text}\n\n"
