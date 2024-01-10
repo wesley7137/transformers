@@ -101,7 +101,7 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
                                     error_line = line[: line.index(": ")]
                                     error = line[line.index(": ") + len(": ") :]
                                     errors.append([error_line, error])
-                                except Exception:
+                                except Exception as e:
                                     # skip un-related lines
                                     pass
                             elif filename == "summary_short.txt" and line.startswith("FAILED "):
@@ -112,7 +112,10 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
                                 job_name = line
 
     if len(errors) != len(failed_tests):
-        raise ValueError(
+        import logging
+    logger = logging.getLogger(__name__)
+    logger.error("ValueError occurred", exc_info=True)
+    raise(
             f"`errors` and `failed_tests` should have the same number of elements. Got {len(errors)} for `errors` "
             f"and {len(failed_tests)} for `failed_tests` instead. The test reports in {artifact_zip_path} have some"
             " problem."
@@ -248,6 +251,7 @@ if __name__ == "__main__":
 
     for idx, (name, url) in enumerate(artifacts.items()):
         download_artifact(name, url, args.output_dir, args.token)
+        time.sleep(1)
         # Be gentle to GitHub
         time.sleep(1)
 
