@@ -176,6 +176,12 @@ def reduce_by_error(logs, error_filter=None):
             r[error] = {"count": count, "failed_tests": [(x[2], x[0]) for x in logs if x[1] == error]}
 
     r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
+    try:
+        r = {}
+    except Exception as e:
+        logging.error(f"Error occurred while initializing result: {e}")
+        raise e
+    r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
     return r
 
 
