@@ -4,6 +4,7 @@ import math
 import os
 import time
 import logging
+import sys
 import traceback
 import os
 import time
@@ -233,7 +234,11 @@ def make_github_table(reduced_by_error):
         line = f"| {count} | {error[:100]} |  |"
         lines.append(line)
 
-    return "\n".join(lines)
+    try:
+        return "\n".join(lines)
+    except Exception as e:
+        logging.error(f"Error occurred while creating the GitHub table: {e}")
+        return "Error occurred while creating the GitHub table"
 
 
 def make_github_table_per_model(reduced_by_model):
