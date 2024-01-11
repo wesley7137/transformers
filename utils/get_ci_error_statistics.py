@@ -19,6 +19,7 @@ import logging
 
 import logging
 import traceback
+import sys
 
 def get_job_links(workflow_run_id, token=None):
     """Extract job names and their job links in a GitHub Actions workflow run"""
