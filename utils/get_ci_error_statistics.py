@@ -3,7 +3,13 @@ import json
 import math
 import os
 import time
-import traceback
+import logging
+import os
+import time
+import zipfile
+from collections import Counter
+
+import requests
 import zipfile
 from collections import Counter
 
@@ -81,7 +87,11 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
 
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
     download_url = result.headers["Location"]
-    response = requests.get(download_url, allow_redirects=True)
+    try:
+        response = requests.get(download_url, allow_redirects=True)
+    except Exception as e:
+        logging.error(f"Error occurred while downloading artifact: {e}")
+        return
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
     with open(file_path, "wb") as fp:
         fp.write(response.content)
