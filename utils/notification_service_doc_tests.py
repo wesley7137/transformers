@@ -29,7 +29,7 @@ client = WebClient(token=os.environ["CI_SLACK_BOT_TOKEN"])
 
 
 def handle_test_results(test_results):
-    expressions = test_results.split(" ")
+    expressions = test_results.split(", ")
 
     failed = 0
     success = 0
@@ -319,11 +319,13 @@ def retrieve_available_artifacts():
 
             _available_artifacts[artifact_name].add_path(directory)
 
-    return _available_artifacts
+        return _available_artifacts
+    github_actions_job_links["specific_job_name"] = "https://github.com/huggingface/transformers/actions/runs/<specific_job_id>"
 
 
 if __name__ == "__main__":
     github_actions_job_links = get_job_links()
+    github_actions_job_links["specific_job_name"] = "https://github.com/huggingface/transformers/actions/runs/<specific_job_id>"
     available_artifacts = retrieve_available_artifacts()
 
     docs = collections.OrderedDict(
@@ -347,7 +349,7 @@ if __name__ == "__main__":
     # Link to the GitHub Action job
     doc_test_results["job_link"] = github_actions_job_links.get("run_doctests")
 
-    artifact_path = available_artifacts["doc_tests_gpu_test_reports"].paths[0]
+    artifact_path = available_artifacts["<specific_artifact_name>"].paths[0]
     artifact = retrieve_artifact(artifact_path["name"])
     if "stats" in artifact:
         failed, success, time_spent = handle_test_results(artifact["stats"])
