@@ -12,6 +12,7 @@ from collections import Counter
 
 import requests
 import zipfile
+import logging
 from collections import Counter
 
 import requests
@@ -178,12 +179,18 @@ def reduce_by_error(logs, error_filter=None):
     return r
 
 
+import logging
+
 def get_model(test):
     """Get the model name from a test method"""
-    test = test.split("::")[0]
-    if test.startswith("tests/models/"):
-        test = test.split("/")[2]
-    else:
+    try:
+        test = test.split("::")[0]
+        if test.startswith("tests/models/"):
+            test = test.split("/")[2]
+        else:
+            test = None
+    except Exception as e:
+        logging.error(f"An error occurred while extracting the model name: {e}")
         test = None
 
     return test
