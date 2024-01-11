@@ -18,7 +18,7 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
     buffer = []
 
     def parse_line(fp):
-        for line in fp:
+        for line in fp.read().splitlines():
             if isinstance(line, bytes):
                 line = line.decode("UTF-8")
             if "warnings summary (final)" in line:
@@ -38,7 +38,7 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                 buffer.append(line)
 
     if from_gh:
-        for filename in os.listdir(artifact_path):
+        for filename in list(filter(lambda x: os.path.isfile(os.path.join(artifact_path, x)),os.listdir(artifact_path))):
             file_path = os.path.join(artifact_path, filename)
             if not os.path.isdir(file_path):
                 # read the file
@@ -48,7 +48,7 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                     parse_line(fp)
     else:
         try:
-            with zipfile.ZipFile(artifact_path) as z:
+            with zipfile.ZipFile(artifact_path, 'r') as z:
                 for filename in z.namelist():
                     if not os.path.isdir(filename):
                         # read the file
@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
     from_gh = args.from_gh
     if from_gh:
-        # The artifacts have to be downloaded using `actions/download-artifact@v3`
+        from_gh = args.from_gh
         pass
     else:
         os.makedirs(args.output_dir, exist_ok=True)
