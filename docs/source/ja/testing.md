@@ -404,6 +404,10 @@ pytest --instafail
 GPU が有効な設定で、CPU のみモードでテストするには、`CUDA_VISIBLE_DEVICES=""`を追加します。
 
 ```bash
+
+### Analyzing Error Logs and Identifying Failures
+
+To analyze error logs and identify the cause of failures, carefully examine the error messages and stack traces. The following examples demonstrate common errors and their solutions to guide the troubleshooting process.
 CUDA_VISIBLE_DEVICES="" pytest tests/utils/test_logging.py
 ```
 
@@ -1190,6 +1194,10 @@ TravisCIのような一部のCIは `ignore-step-failure` をサポートし、�
         echo "setting run-all-despite-any-errors-mode"
         this_command_will_fail
         echo "but bash continues to run"
+
+## Troubleshooting and Handling Failures in GitHub Actions Runs
+
+When a GitHub Actions run fails, it can be crucial to handle failures appropriately. Consider implementing error handling strategies to address failures and maintain the reliability of the workflow. Additionally, utilize logging and debugging tools to troubleshoot errors and identify their root causes.
         # emulate another failure
         false
         # but the last command must be a success
