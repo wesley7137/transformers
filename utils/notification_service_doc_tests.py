@@ -319,11 +319,13 @@ def retrieve_available_artifacts():
 
             _available_artifacts[artifact_name].add_path(directory)
 
-    return _available_artifacts
+        return _available_artifacts
+    github_actions_job_links["specific_job_name"] = "https://github.com/huggingface/transformers/actions/runs/<specific_job_id>"
 
 
 if __name__ == "__main__":
     github_actions_job_links = get_job_links()
+    github_actions_job_links["specific_job_name"] = "https://github.com/huggingface/transformers/actions/runs/<specific_job_id>"
     available_artifacts = retrieve_available_artifacts()
 
     docs = collections.OrderedDict(
