@@ -10,6 +10,9 @@ from collections import Counter
 import requests
 
 
+import logging
+import traceback
+
 def get_job_links(workflow_run_id, token=None):
     """Extract job names and their job links in a GitHub Actions workflow run"""
 
