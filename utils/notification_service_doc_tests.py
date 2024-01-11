@@ -29,7 +29,7 @@ client = WebClient(token=os.environ["CI_SLACK_BOT_TOKEN"])
 
 
 def handle_test_results(test_results):
-    expressions = test_results.split(" ")
+    expressions = test_results.strip("=").split(" ")
 
     failed = 0
     success = 0
@@ -55,7 +55,7 @@ def extract_first_line_failure(failures_short_lines):
         if re.search(r"_ \[doctest\]", line):
             in_error = True
             file = line.split(" ")[2]
-        elif in_error and not line.split(" ")[0].isdigit():
+        elif in_error and not line[0].isdigit():
             failures[file] = line
             in_error = False
 
@@ -73,6 +73,8 @@ class Message:
 
         # Failures and success of the modeling tests
         self.doc_test_results = doc_test_results
+        if 'job_link' in doc_test_results:
+            self.test_name = doc_test_results['job_link'].split('/')[-1]
 
     @property
     def time(self) -> str:
