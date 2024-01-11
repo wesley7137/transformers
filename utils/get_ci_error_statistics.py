@@ -3,12 +3,26 @@ import json
 import math
 import os
 import time
+import logging
+import sys
 import traceback
+import os
+import time
 import zipfile
 from collections import Counter
 
 import requests
+import zipfile
+import logging
+from collections import Counter
 
+import requests
+import logging
+
+
+import logging
+import traceback
+import sys
 
 def get_job_links(workflow_run_id, token=None):
     """Extract job names and their job links in a GitHub Actions workflow run"""
@@ -30,7 +44,7 @@ def get_job_links(workflow_run_id, token=None):
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
+    except Exception as e:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
@@ -56,7 +70,9 @@ def get_artifacts_links(worflow_run_id, token=None):
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
         return artifacts
-    except Exception:
+    except Exception as e:
+        logging.error(f"Unknown error occurred while fetching artifact links: {e}")
+        return {}
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
@@ -75,7 +91,11 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
 
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
     download_url = result.headers["Location"]
-    response = requests.get(download_url, allow_redirects=True)
+    try:
+        response = requests.get(download_url, allow_redirects=True)
+    except Exception as e:
+        logging.error(f"Error occurred while downloading artifact: {e}")
+        return
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
     with open(file_path, "wb") as fp:
         fp.write(response.content)
@@ -146,21 +166,38 @@ def reduce_by_error(logs, error_filter=None):
     counter = Counter()
     counter.update([x[1] for x in logs])
     counts = counter.most_common()
-    r = {}
+    try:
+        r = {}
+    except Exception as e:
+        logging.error(f"Error occurred while initializing result: {e}")
+        raise e
+    
     for error, count in counts:
         if error_filter is None or error not in error_filter:
             r[error] = {"count": count, "failed_tests": [(x[2], x[0]) for x in logs if x[1] == error]}
 
     r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
+    try:
+        r = {}
+    except Exception as e:
+        logging.error(f"Error occurred while initializing result: {e}")
+        raise e
+    r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
     return r
 
 
+import logging
+
 def get_model(test):
     """Get the model name from a test method"""
-    test = test.split("::")[0]
-    if test.startswith("tests/models/"):
-        test = test.split("/")[2]
-    else:
+    try:
+        test = test.split("::")[0]
+        if test.startswith("tests/models/"):
+            test = test.split("/")[2]
+        else:
+            test = None
+    except Exception as e:
+        logging.error(f"An error occurred while extracting the model name: {e}")
         test = None
 
     return test
@@ -197,7 +234,11 @@ def make_github_table(reduced_by_error):
         line = f"| {count} | {error[:100]} |  |"
         lines.append(line)
 
-    return "\n".join(lines)
+    try:
+        return "\n".join(lines)
+    except Exception as e:
+        logging.error(f"Error occurred while creating the GitHub table: {e}")
+        return "Error occurred while creating the GitHub table"
 
 
 def make_github_table_per_model(reduced_by_model):
@@ -214,6 +255,66 @@ def make_github_table_per_model(reduced_by_model):
 
 
 if __name__ == "__main__":
+    try:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
+        parser.add_argument("--output_dir", type=str, required=True, help="Where to store the downloaded artifacts and other result files.")
+        parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
+        args = parser.parse_args()
+
+        os.makedirs(args.output_dir, exist_ok=True)
+
+        _job_links = get_job_links(args.workflow_run_id, token=args.token)
+        job_links = {}
+
+        # To deal with `workflow_call` event, where a job name is the combination of the job names in the caller and callee.
+        # For example, `PyTorch 1.11 / Model tests (models/albert, single-gpu)`.
+        if _job_links:
+            for k, v in _job_links.items():
+                # This is how GitHub actions combine job names.
+                if " / " in k:
+                    index = k.find(" / ")
+                    k = k[index + len(" / ") :]
+                job_links[k] = v
+        with open(os.path.join(args.output_dir, "job_links.json"), "w", encoding="UTF-8") as fp:
+            json.dump(job_links, fp, ensure_ascii=False, indent=4)
+
+        artifacts = get_artifacts_links(args.workflow_run_id, token=args.token)
+
+        with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="UTF-8") as fp:
+            json.dump(artifacts, fp, ensure_ascii=False, indent=4)
+
+        for idx, (name, url) in enumerate(artifacts.items()):
+            download_artifact(name, url, args.output_dir, args.token)
+            # Be gentle to GitHub
+            time.sleep(1)
+
+        errors = get_all_errors(args.output_dir, job_links=job_links)
+
+        # Counter for counting errors
+        counter = Counter()
+        try:
+            counter.update([e[1] for e in errors])
+            most_common = counter.most_common(30)
+
+            with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
+                json.dump(errors, fp, ensure_ascii=False, indent=4)
+
+            reduced_by_error = reduce_by_error(errors)
+            reduced_by_model = reduce_by_model(errors)
+
+            s1 = make_github_table(reduced_by_error)
+            s2 = make_github_table_per_model(reduced_by_model)
+
+            with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
+                fp.write(s1)
+            with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
+                fp.write(s2)
+
+        except Exception as e:
+            logging.error(f"An error occurred: {e}")
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
     parser = argparse.ArgumentParser()
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
