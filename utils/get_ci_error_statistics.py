@@ -73,7 +73,14 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     if token is not None:
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
-    result = requests.get(artifact_url, headers=headers, allow_redirects=False)
+    try:
+        result = requests.get(artifact_url, headers=headers, allow_redirects=False)
+    except requests.RequestException as e:
+        print(f'An error occurred while fetching artifacts: {e}')
+        result = None
+    except Exception as e:
+        print(f'An unknown error occurred while fetching artifacts: {e}')
+        result = None
     download_url = result.headers["Location"]
     response = requests.get(download_url, allow_redirects=True)
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
