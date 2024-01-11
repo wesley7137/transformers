@@ -6,6 +6,9 @@ import zipfile
 
 from get_ci_error_statistics import download_artifact, get_artifacts_links
 
+# Add new import for error handling
+from error_handler import handle_specific_error
+
 from transformers import logging
 
 

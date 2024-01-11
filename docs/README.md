@@ -39,6 +39,10 @@ check how they look before committing for instance). You don't have to commit th
 
 ## Building the documentation
 
+## Troubleshooting and Handling Failures in GitHub Actions Runs
+
+When a GitHub Actions run fails, it can be crucial to handle failures appropriately. Consider implementing error handling strategies to address failures and maintain the reliability of the workflow. Additionally, utilize logging and debugging tools to troubleshoot errors and identify their root causes.
+
 Once you have setup the `doc-builder` and additional packages, you can generate the documentation by 
 typing the following command:
 
@@ -79,7 +83,9 @@ The `preview` command only works with existing doc files. When you add a complet
 
 ---
 
-## Adding a new element to the navigation bar
+## Analyzing Error Logs and Identifying Failures
+
+To analyze error logs and identify the cause of failures, carefully examine the error messages and stack traces. The following examples demonstrate common errors and their solutions to guide the troubleshooting process.
 
 Accepted files are Markdown (.md).
 

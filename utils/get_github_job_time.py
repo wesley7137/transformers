@@ -26,7 +26,7 @@ def extract_time_from_single_job(job):
     return job_info
 
 
-def get_job_time(workflow_run_id, token=None):
+def get_job_time(workflow_run_id, token=None, error_handler=None):
     """Extract time info for all jobs in a GitHub Actions workflow run"""
 
     headers = None
@@ -34,7 +34,10 @@ def get_job_time(workflow_run_id, token=None):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
-    result = requests.get(url, headers=headers).json()
+    try:
+        result = requests.get(url, headers=headers).json()
+    except Exception as e:
+        error_handler(e)
     job_time = {}
 
     try:
@@ -46,7 +49,8 @@ def get_job_time(workflow_run_id, token=None):
             job_time.update({job["name"]: extract_time_from_single_job(job) for job in result["jobs"]})
 
         return job_time
-    except Exception:
+    except Exception as e:
+        error_handler(e)
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
