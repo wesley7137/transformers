@@ -195,8 +195,13 @@ except Exception as e:
 def reduce_by_model(logs, error_filter=None):
     """count each error per model"""
 
-    logs = [(x[0], x[1], get_model(x[2])) for x in logs]
-    logs = [x for x in logs if x[2] is not None]
+    try:
+        logs = [(x[0], x[1], get_model(x[2])) for x in logs]
+    except Exception as e:
+        logging.error(f'An error occurred while obtaining models: {e}')
+            logs = [x for x in logs if x[2] is not None]
+    except Exception as e:
+        logging.error(f'An error occurred while obtaining valid models: {e}')
     tests = {x[2] for x in logs}
 
     r = {}
