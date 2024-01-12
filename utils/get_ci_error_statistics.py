@@ -30,8 +30,11 @@ def get_job_links(workflow_run_id, token=None):
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
+    except Exception as e:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+        print(e)
+        import logging
+        logging.error('Error occurred while fetching links')
 
     return {}
 
@@ -56,8 +59,11 @@ def get_artifacts_links(worflow_run_id, token=None):
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
         return artifacts
-    except Exception:
+    except Exception as e:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+        print(e)
+        import logging
+        logging.error('Error occurred while fetching links')
 
     return {}
 
@@ -250,6 +256,8 @@ if __name__ == "__main__":
         download_artifact(name, url, args.output_dir, args.token)
         # Be gentle to GitHub
         time.sleep(1)
+        # Be gentle to GitHub
+        time.sleep(1)
 
     errors = get_all_errors(args.output_dir, job_links=job_links)
 
@@ -261,6 +269,8 @@ if __name__ == "__main__":
     most_common = counter.most_common(30)
     for item in most_common:
         print(item)
+        import logging
+        logging.error('Error occurred while getting most common test errors')
 
     with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
         json.dump(errors, fp, ensure_ascii=False, indent=4)
