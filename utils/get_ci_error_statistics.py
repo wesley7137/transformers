@@ -7,6 +7,8 @@ import traceback
 import zipfile
 from collections import Counter
 
+import sys
+import sys
 import requests
 
 
@@ -214,7 +216,7 @@ def make_github_table_per_model(reduced_by_model):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='This script extracts errors and artifacts from a GitHub Actions workflow run. It requires the following command-line arguments:\n- --workflow_run_id: A GitHub Actions workflow run id.\n- --output_dir: Where to store the downloaded artifacts and other result files.\n\nThe script handles potential errors when retrieving job links, downloading artifacts, and getting errors. It provides appropriate error messages and logging statements to provide more information about the failure. The script exits with a non-zero exit code in case of failure.')
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
     parser.add_argument(
@@ -251,7 +253,11 @@ if __name__ == "__main__":
         # Be gentle to GitHub
         time.sleep(1)
 
-    errors = get_all_errors(args.output_dir, job_links=job_links)
+    try:
+        errors = get_all_errors(args.output_dir, job_links=job_links)
+    except Exception as e:
+        print(f'Failed to get errors. Error: {e}', file=sys.stderr)
+        exit(1)
 
     # `e[1]` is the error
     counter = Counter()
