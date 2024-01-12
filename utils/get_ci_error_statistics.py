@@ -1,4 +1,7 @@
+import logging
 import argparse
+
+logging.basicConfig(filename='error.log', level=logging.ERROR) if 'error.log' not in logging.getLogger().handlers else None
 import json
 import math
 import os
