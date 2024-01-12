@@ -3,11 +3,15 @@ import json
 import math
 import os
 import time
+import logging
+import logging
 import traceback
+import logging
 import zipfile
 from collections import Counter
 
 import requests
+import logging
 
 
 def get_job_links(workflow_run_id, token=None):
@@ -54,6 +58,11 @@ def get_artifacts_links(worflow_run_id, token=None):
         for i in range(pages_to_iterate_over):
             result = requests.get(url + f"&page={i + 2}", headers=headers).json()
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
+
+        return artifacts
+    except Exception as e:
+        logging.error(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+        return {}
 
         return artifacts
     except Exception:
@@ -249,7 +258,7 @@ if __name__ == "__main__":
     for idx, (name, url) in enumerate(artifacts.items()):
         download_artifact(name, url, args.output_dir, args.token)
         # Be gentle to GitHub
-        time.sleep(1)
+        time.sleep(5)
 
     errors = get_all_errors(args.output_dir, job_links=job_links)
 
