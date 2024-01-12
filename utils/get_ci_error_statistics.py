@@ -4,10 +4,12 @@ import math
 import os
 import time
 import traceback
+import logging
 import zipfile
 from collections import Counter
 
 import requests
+import logging
 
 
 def get_job_links(workflow_run_id, token=None):
@@ -249,7 +251,7 @@ if __name__ == "__main__":
     for idx, (name, url) in enumerate(artifacts.items()):
         download_artifact(name, url, args.output_dir, args.token)
         # Be gentle to GitHub
-        time.sleep(1)
+        time.sleep(5)
 
     errors = get_all_errors(args.output_dir, job_links=job_links)
 
