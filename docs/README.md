@@ -364,7 +364,7 @@ We use pytests' [doctest integration](https://docs.pytest.org/doctest.html) to v
 For Transformers, the doctests are run on a daily basis via GitHub Actions as can be 
 seen [here](https://github.com/huggingface/transformers/actions/workflows/doctests.yml).
 
-### For Python files
+### Running Doc Tests for Python Files
 
 Run all the tests in the docstrings of a given file with the following command, here is how we test the modeling file of Wav2Vec2 for instance:
 
@@ -378,12 +378,12 @@ If you want to isolate a specific docstring, just add `::` after the file name t
 pytest --doctest-modules src/transformers/models/wav2vec2/modeling_wav2vec2.py::transformers.models.wav2vec2.modeling_wav2vec2.Wav2Vec2ForCTC.forward -sv --doctest-continue-on-failure
 ```
 
-### For Markdown files
+### Running Doc Tests for Markdown Files
 
 You can test locally a given file with this command (here testing the quicktour):
 
 ```bash
-pytest --doctest-modules docs/source/quicktour.md -sv --doctest-continue-on-failure --doctest-glob="*.md"
+pytest --doctest-modules docs/source/quicktour.md -sv --doctest-continue-on-failure --doctest-glob="*.md" --doctest-glob="*.md"
 ```
 
 ### Writing doctests
