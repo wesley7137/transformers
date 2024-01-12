@@ -48,6 +48,8 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                     parse_line(fp)
     else:
         try:
+            # Add error handling and logging to provide more information about the error.
+            logger.exception(f"An error occurred when extracting warnings from {artifact_path}")
             with zipfile.ZipFile(artifact_path) as z:
                 for filename in z.namelist():
                     if not os.path.isdir(filename):
