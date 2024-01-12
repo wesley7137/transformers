@@ -1,4 +1,7 @@
+import logging
 import argparse
+
+logging.basicConfig(filename='error.log', level=logging.ERROR) if 'error.log' not in logging.getLogger().handlers else None
 import json
 import math
 import os
@@ -30,8 +33,8 @@ def get_job_links(workflow_run_id, token=None):
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    except Exception as e:
+        print(f"Error occurred while fetching job links:\n{traceback.format_exc()}\nError details: {e}")
 
     return {}
 
@@ -56,10 +59,12 @@ def get_artifacts_links(worflow_run_id, token=None):
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
         return artifacts
-    except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    except Exception as e:
+        print(f"Error occurred while fetching artifacts links:\n{traceback.format_exc()}\nError details: {e}")
 
-    return {}
+    except Exception as e:
+        print(f"Error occurred while extracting artifact:\n{traceback.format_exc()}\nError details: {e}")
+        return {}
 
 
 def download_artifact(artifact_name, artifact_url, output_dir, token):
@@ -94,7 +99,11 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
                 if filename in ["failures_line.txt", "summary_short.txt", "job_name.txt"]:
                     with z.open(filename) as f:
                         for line in f:
-                            line = line.decode("UTF-8").strip()
+                            try:
+                                line = line.decode("UTF-8").strip()
+                            except Exception as e:
+                                print(f"Error occurred while extracting artifact:\n{traceback.format_exc()}\nError details: {e}")
+                                continue
                             if filename == "failures_line.txt":
                                 try:
                                     # `error_line` is the place where `error` occurs
@@ -247,7 +256,12 @@ if __name__ == "__main__":
         json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 
     for idx, (name, url) in enumerate(artifacts.items()):
-        download_artifact(name, url, args.output_dir, args.token)
+        try:
+            download_artifact(name, url, args.output_dir, args.token)
+        except Exception as e:
+            print(f"Error occurred while downloading artifact {name} from URL {url}:\n{traceback.format_exc()}\nError details: {e}")
+        finally:
+            time.sleep(2)
         # Be gentle to GitHub
         time.sleep(1)
 
@@ -268,8 +282,11 @@ if __name__ == "__main__":
     reduced_by_error = reduce_by_error(errors)
     reduced_by_model = reduce_by_model(errors)
 
-    s1 = make_github_table(reduced_by_error)
-    s2 = make_github_table_per_model(reduced_by_model)
+    try:
+        s1 = make_github_table(reduced_by_error)
+        s2 = make_github_table_per_model(reduced_by_model)
+    except Exception as e:
+        print(f"Error occurred while generating tables:\n{traceback.format_exc()}\nError details: {e}")
 
     with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s1)
