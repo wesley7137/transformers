@@ -8,6 +8,8 @@ import zipfile
 from collections import Counter
 
 import requests
+import logging
+import logging
 
 
 def get_job_links(workflow_run_id, token=None):
@@ -22,6 +24,7 @@ def get_job_links(workflow_run_id, token=None):
     job_links = {}
 
     try:
+        # Add error logging
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
@@ -30,7 +33,8 @@ def get_job_links(workflow_run_id, token=None):
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
+    except Exception as e:
+        logging.error(f'An error occurred: {e}', exc_info=True)
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
@@ -56,7 +60,8 @@ def get_artifacts_links(worflow_run_id, token=None):
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
         return artifacts
-    except Exception:
+    except Exception as e:
+        logging.error(f'An error occurred: {e}', exc_info=True)
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
@@ -272,6 +277,8 @@ if __name__ == "__main__":
     s2 = make_github_table_per_model(reduced_by_model)
 
     with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
+        logging.info("Writing reduced_by_error.txt file...")
         fp.write(s1)
     with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
+        logging.info("Writing reduced_by_model.txt file...")
         fp.write(s2)
