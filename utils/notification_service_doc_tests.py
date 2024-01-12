@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections import defaultdict
+from collections import defaultdict
 import collections
 import json
 import math
@@ -31,8 +33,8 @@ client = WebClient(token=os.environ["CI_SLACK_BOT_TOKEN"])
 def handle_test_results(test_results):
     expressions = test_results.split(" ")
 
-    failed = 0
-    success = 0
+    failed = defaultdict(int)
+    success = defaultdict(int)
 
     # When the output is short enough, the output is surrounded by = signs: "== OUTPUT =="
     # When it is too long, those signs are not present.
@@ -349,7 +351,7 @@ if __name__ == "__main__":
 
     artifact_path = available_artifacts["doc_tests_gpu_test_reports"].paths[0]
     artifact = retrieve_artifact(artifact_path["name"])
-    if "stats" in artifact:
+    if "stats" in artifact and handle_test_results(artifact["stats"]):
         failed, success, time_spent = handle_test_results(artifact["stats"])
         doc_test_results["failures"] = failed
         doc_test_results["success"] = success
