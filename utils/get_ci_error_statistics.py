@@ -6,7 +6,7 @@ import time
 import traceback
 import os
 import zipfile
-from collections import Counter
+import logging
 
 import requests
 import logging
@@ -181,10 +181,13 @@ def reduce_by_error(logs, error_filter=None):
 def get_model(test):
     """Get the model name from a test method"""
     test = test.split("::")[0]
-    if test.startswith("tests/models/"):
-        test = test.split("/")[2]
-    else:
-        test = None
+    try:
+        if test.startswith("tests/models/"):
+            test = test.split("/")[2]
+        else:
+            test = None
+except Exception as e:
+        logging.error(f'An error occurred while extracting the model name: {e}')
 
     return test
 
