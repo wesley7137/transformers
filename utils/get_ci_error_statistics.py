@@ -1,5 +1,5 @@
 import argparse, os, time, traceback, zipfile, requests, logging, json, math, requests, Counter
-import json
+import logging
 import math
 import os
 import time
@@ -90,7 +90,10 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
     try:
         download_url = result.headers['Location']
-        response = requests.get(download_url, allow_redirects=True)
+        try:
+            response = requests.get(download_url, allow_redirects=True)
+        except Exception as e:
+            logging.error(f'An error occurred while downloading the artifact: {e}')
     except Exception as e:
         logging.error(f'An error occurred while downloading the artifact: {e}')
         return
