@@ -1,3 +1,4 @@
+import logging
 import argparse
 import json
 import math
@@ -30,8 +31,9 @@ def get_job_links(workflow_run_id, token=None):
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
+    except Exception as e:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+        print(f"Error: {e}")
 
     return {}
 
@@ -248,6 +250,8 @@ if __name__ == "__main__":
 
     for idx, (name, url) in enumerate(artifacts.items()):
         download_artifact(name, url, args.output_dir, args.token)
+        # Add a sleep to avoid overwhelming the GitHub API
+        time.sleep(1)
         # Be gentle to GitHub
         time.sleep(1)
 
