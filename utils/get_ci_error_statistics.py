@@ -22,6 +22,7 @@ def get_job_links(workflow_run_id, token=None):
     job_links = {}
 
     try:
+        job_links = {}
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
@@ -48,6 +49,7 @@ def get_artifacts_links(worflow_run_id, token=None):
     artifacts = {}
 
     try:
+        artifacts = {}
         artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
@@ -70,6 +72,11 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     See https://docs.github.com/en/rest/actions/artifacts#download-an-artifact
     """
     headers = None
+    download_url = None
+    try:
+        response = requests.get(download_url, allow_redirects=True)
+    except Exception as e:
+        print(f"Unknown error, could not download artifact from {download_url}: {str(e)}")
     if token is not None:
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
@@ -101,7 +108,11 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
                                     error_line = line[: line.index(": ")]
                                     error = line[line.index(": ") + len(": ") :]
                                     errors.append([error_line, error])
-                                except Exception:
+                                except Exception as e:
+                                    print(f"Unknown error, could not extract artifact errors: {str(e)}")
+                                    # skip un-related lines
+                                except Exception as e:
+                                    print(f"Unknown error, could not extract artifact errors: {str(e)}")
                                     # skip un-related lines
                                     pass
                             elif filename == "summary_short.txt" and line.startswith("FAILED "):
