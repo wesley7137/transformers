@@ -1,4 +1,4 @@
-import argparse
+import argparse, os, time, traceback, zipfile, requests, logging, json, math, requests, Counter
 import json
 import math
 import os
@@ -121,7 +121,7 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
                                     error_line = line[: line.index(": ")]
                                     error = line[line.index(": ") + len(": ") :]
                                     errors.append([error_line, error])
-                                except Exception:
+                                except Exception as e:
                                     # skip un-related lines
                                     pass
                             elif filename == "summary_short.txt" and line.startswith("FAILED "):
