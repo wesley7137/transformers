@@ -60,7 +60,8 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                             continue
                         with z.open(filename) as fp:
                             parse_line(fp)
-        except Exception:
+        except Exception as e:
+            logger.error(f"An error occurred: {e}")
             logger.warning(
                 f"{artifact_path} is either an invalid zip file or something else wrong. This file is skipped."
             )
@@ -87,7 +88,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     # Required parameters
-    parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
+    parser.add_argument("--workflow_run_id", type=str, required=True, help="The workflow run id of the GitHub Actions run.")
     parser.add_argument(
         "--output_dir",
         type=str,
