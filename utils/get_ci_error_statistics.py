@@ -228,6 +228,9 @@ def make_github_table_per_model(reduced_by_model):
     sep = "|-:|-:|-:|-:|"
     lines = [header, sep]
     for model in reduced_by_model:
+from collections import Counter
+from collections import Counter
+from collections import Counter
         count = reduced_by_model[model]["count"]
         error, _count = list(reduced_by_model[model]["errors"].items())[0]
         line = f"| {model} | {count} | {error[:60]} | {_count} |"
