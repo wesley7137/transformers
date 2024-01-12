@@ -1,4 +1,6 @@
-import argparse, os, time, traceback, zipfile, requests, logging, json, math, requests, Counter
+import argparse, os, time, traceback, zipfile, requests, logging, json, math
+import logging
+from collections import Counter
 import logging
 import math
 import os
@@ -249,6 +251,7 @@ from collections import Counter
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+try:
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
     parser.add_argument(
@@ -295,6 +298,8 @@ if __name__ == "__main__":
     most_common = counter.most_common(30)
     for item in most_common:
         print(item)
+except Exception as e:
+    logging.error(f'An error occurred: {e}')
 
     with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
         json.dump(errors, fp, ensure_ascii=False, indent=4)
@@ -308,4 +313,7 @@ if __name__ == "__main__":
     with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s1)
     with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
+    try:
         fp.write(s2)
+    except Exception as e:
+        logging.error(f'An error occurred while writing to the file: {e}')
