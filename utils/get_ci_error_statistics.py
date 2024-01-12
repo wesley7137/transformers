@@ -1,12 +1,18 @@
-import argparse
-import json
+import argparse, os, time, traceback, zipfile, requests, logging, json, math
+import logging
+from collections import Counter
+import logging
 import math
 import os
 import time
 import traceback
-import zipfile
-from collections import Counter
+import os
+import logging, zipfile
+import logging
 
+import requests
+import logging
+import traceback
 import requests
 
 
@@ -18,7 +24,11 @@ def get_job_links(workflow_run_id, token=None):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
-    result = requests.get(url, headers=headers).json()
+    try:
+        result = requests.get(url, headers=headers).json()
+    except Exception as e:
+        logging.error(f'An error occurred while fetching job links: {e}')
+        return {}
     job_links = {}
 
     try:
@@ -33,7 +43,9 @@ def get_job_links(workflow_run_id, token=None):
     except Exception:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
-    return {}
+    except Exception:
+        logging.error(f'An error occurred while fetching artifacts: {e}')
+        return {}
 
 
 def get_artifacts_links(worflow_run_id, token=None):
@@ -44,7 +56,11 @@ def get_artifacts_links(worflow_run_id, token=None):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{worflow_run_id}/artifacts?per_page=100"
-    result = requests.get(url, headers=headers).json()
+    try:
+        result = requests.get(url, headers=headers).json()
+    except Exception as e:
+        logging.error(f'An error occurred while fetching artifacts: {e}')
+        return {}
     artifacts = {}
 
     try:
@@ -74,6 +90,15 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
+    try:
+        download_url = result.headers['Location']
+        try:
+            response = requests.get(download_url, allow_redirects=True)
+        except Exception as e:
+            logging.error(f'An error occurred while downloading the artifact: {e}')
+    except Exception as e:
+        logging.error(f'An error occurred while downloading the artifact: {e}')
+        return
     download_url = result.headers["Location"]
     response = requests.get(download_url, allow_redirects=True)
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
@@ -101,7 +126,7 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
                                     error_line = line[: line.index(": ")]
                                     error = line[line.index(": ") + len(": ") :]
                                     errors.append([error_line, error])
-                                except Exception:
+                                except Exception as e:
                                     # skip un-related lines
                                     pass
                             elif filename == "summary_short.txt" and line.startswith("FAILED "):
@@ -158,10 +183,13 @@ def reduce_by_error(logs, error_filter=None):
 def get_model(test):
     """Get the model name from a test method"""
     test = test.split("::")[0]
-    if test.startswith("tests/models/"):
-        test = test.split("/")[2]
-    else:
-        test = None
+    try:
+        if test.startswith("tests/models/"):
+            test = test.split("/")[2]
+        else:
+            test = None
+except Exception as e:
+        logging.error(f'An error occurred while extracting the model name: {e}')
 
     return test
 
@@ -169,8 +197,13 @@ def get_model(test):
 def reduce_by_model(logs, error_filter=None):
     """count each error per model"""
 
-    logs = [(x[0], x[1], get_model(x[2])) for x in logs]
-    logs = [x for x in logs if x[2] is not None]
+    try:
+        logs = [(x[0], x[1], get_model(x[2])) for x in logs]
+    except Exception as e:
+        logging.error(f'An error occurred while obtaining models: {e}')
+            logs = [x for x in logs if x[2] is not None]
+    except Exception as e:
+        logging.error(f'An error occurred while obtaining valid models: {e}')
     tests = {x[2] for x in logs}
 
     r = {}
@@ -205,6 +238,9 @@ def make_github_table_per_model(reduced_by_model):
     sep = "|-:|-:|-:|-:|"
     lines = [header, sep]
     for model in reduced_by_model:
+from collections import Counter
+from collections import Counter
+from collections import Counter
         count = reduced_by_model[model]["count"]
         error, _count = list(reduced_by_model[model]["errors"].items())[0]
         line = f"| {model} | {count} | {error[:60]} | {_count} |"
@@ -215,6 +251,7 @@ def make_github_table_per_model(reduced_by_model):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+try:
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
     parser.add_argument(
@@ -261,6 +298,8 @@ if __name__ == "__main__":
     most_common = counter.most_common(30)
     for item in most_common:
         print(item)
+except Exception as e:
+    logging.error(f'An error occurred: {e}')
 
     with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
         json.dump(errors, fp, ensure_ascii=False, indent=4)
@@ -274,4 +313,7 @@ if __name__ == "__main__":
     with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s1)
     with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
+    try:
         fp.write(s2)
+    except Exception as e:
+        logging.error(f'An error occurred while writing to the file: {e}')
