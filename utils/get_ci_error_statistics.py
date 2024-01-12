@@ -1,3 +1,4 @@
+import logging
 import argparse
 import json
 import math
@@ -14,12 +15,26 @@ def get_job_links(workflow_run_id, token=None):
     """Extract job names and their job links in a GitHub Actions workflow run"""
 
     headers = None
+    
+    logging.basicConfig(level=logging.INFO, filename='github_actions.log', format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger()
     if token is not None:
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
-    result = requests.get(url, headers=headers).json()
-    job_links = {}
+    try:
+        result = requests.get(url, headers=headers).json()
+        job_links.update({job['name']: job['html_url'] for job in result['jobs']})
+        pages_to_iterate_over = math.ceil((result['total_count'] - 100) / 100)
+
+        for i in range(pages_to_iterate_over):
+            result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+            job_links.update({job['name']: job['html_url'] for job in result['jobs']})
+
+        return job_links
+    except Exception as e:
+        logging.error(f"An error occurred while fetching job links: {e}")
+        return {}
 
     try:
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
@@ -30,8 +45,9 @@ def get_job_links(workflow_run_id, token=None):
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
+    except Exception as e:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+        print(f"Error: {e}")
 
     return {}
 
@@ -248,6 +264,8 @@ if __name__ == "__main__":
 
     for idx, (name, url) in enumerate(artifacts.items()):
         download_artifact(name, url, args.output_dir, args.token)
+        # Add a sleep to avoid overwhelming the GitHub API
+        time.sleep(1)
         # Be gentle to GitHub
         time.sleep(1)
 
