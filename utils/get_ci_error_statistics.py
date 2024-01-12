@@ -15,6 +15,9 @@ def get_job_links(workflow_run_id, token=None):
     """Extract job names and their job links in a GitHub Actions workflow run"""
 
     headers = None
+    
+    logging.basicConfig(level=logging.INFO, filename='github_actions.log', format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger()
     if token is not None:
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
