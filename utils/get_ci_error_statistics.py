@@ -9,6 +9,8 @@ from collections import Counter
 
 import requests
 import logging
+import traceback
+import requests
 
 
 def get_job_links(workflow_run_id, token=None):
@@ -38,7 +40,9 @@ def get_job_links(workflow_run_id, token=None):
     except Exception:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
-    return {}
+    except Exception:
+        logging.error(f'An error occurred while fetching artifacts: {e}')
+        return {}
 
 
 def get_artifacts_links(worflow_run_id, token=None):
@@ -49,7 +53,11 @@ def get_artifacts_links(worflow_run_id, token=None):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{worflow_run_id}/artifacts?per_page=100"
-    result = requests.get(url, headers=headers).json()
+    try:
+        result = requests.get(url, headers=headers).json()
+    except Exception as e:
+        logging.error(f'An error occurred while fetching artifacts: {e}')
+        return {}
     artifacts = {}
 
     try:
