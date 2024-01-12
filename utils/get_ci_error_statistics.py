@@ -5,7 +5,7 @@ import os
 import time
 import traceback
 import os
-import zipfile
+import logging, zipfile
 import logging
 
 import requests
