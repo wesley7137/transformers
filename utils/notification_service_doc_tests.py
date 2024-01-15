@@ -38,7 +38,8 @@ def handle_test_results(test_results):
     # When it is too long, those signs are not present.
     time_spent = expressions[-2] if "=" in expressions[-1] else expressions[-1]
 
-    for i, expression in enumerate(expressions):
+    for expression in expressions:
+        i = expressions.index(expression)
         if "failed" in expression:
             failed += int(expressions[i - 1])
         if "passed" in expression:
@@ -347,7 +348,11 @@ if __name__ == "__main__":
     # Link to the GitHub Action job
     doc_test_results["job_link"] = github_actions_job_links.get("run_doctests")
 
-    artifact_path = available_artifacts["doc_tests_gpu_test_reports"].paths[0]
+    artifact_path = available_artifacts.get("doc_tests_gpu_test_reports")
+    if artifact_path is None:
+        artifact_path = {"name": ""}
+    else:
+        artifact_path = artifact_path.paths[0]
     artifact = retrieve_artifact(artifact_path["name"])
     if "stats" in artifact:
         failed, success, time_spent = handle_test_results(artifact["stats"])
@@ -378,3 +383,14 @@ if __name__ == "__main__":
     message = Message("🤗 Results of the doc tests.", doc_test_results)
     message.post()
     message.post_reply()
+    message = Message("🤗 Results of the doc tests.", doc_test_results)
+    message.post()
+    message.post_reply()
+                    continue
+
+    message = Message("🤗 Results of the doc tests.", doc_test_results)
+    message.post()
+    message.post_reply()
+message.post_reply()
+message.post_reply()
+message.post_reply()
