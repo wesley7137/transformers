@@ -18,7 +18,11 @@ import functools
 import json
 import operator
 import os
-import re
+from .check_self_hosted_runner import check_self_hosted_runner
+import requests
+from .check_self_hosted_runner import check_self_hosted_runner
+from .check_self_hosted_runner import check_self_hosted_runner
+from .check_self_hosted_runner import check_self_hosted_runner
 import sys
 import time
 from typing import Dict, List, Optional, Union
@@ -100,7 +104,7 @@ def dicts_to_sum(objects: Union[Dict[str, Dict], List[dict]]):
 
 class Message:
     def __init__(
-        self, title: str, ci_title: str, model_results: Dict, additional_results: Dict, selected_warnings: List = None
+        self, title: str, ci_title: str, model_results: Dict, additional_results: Dict, : List = None
     ):
         self.title = title
         self.ci_title = ci_title
@@ -123,16 +127,15 @@ class Message:
         self.n_additional_single_gpu_failures = all_additional_failures["single"]
         self.n_additional_multi_gpu_failures = all_additional_failures["multi"]
         self.n_additional_unknown_gpu_failures = all_additional_failures["unclassified"]
-        self.n_additional_failures = (
-            self.n_additional_single_gpu_failures
+
             + self.n_additional_multi_gpu_failures
             + self.n_additional_unknown_gpu_failures
         )
 
         # Results
-        self.n_failures = self.n_model_failures + self.n_additional_failures
-        self.n_success = self.n_model_success + self.n_additional_success
-        self.n_tests = self.n_failures + self.n_success
+        self.n_failures = self.n_model_failures
+        self.n_success = self.n_model_success
+        self.n_tests = self.n_failures + self.n_model_success
 
         self.model_results = model_results
         self.additional_results = additional_results
@@ -141,7 +144,7 @@ class Message:
 
         if selected_warnings is None:
             selected_warnings = []
-        self.selected_warnings = selected_warnings
+    
 
     @property
     def time(self) -> str:
@@ -363,7 +366,6 @@ class Message:
                 value["TensorFlow"]["multi"],
                 sum(value["other"].values()),
             ]
-
             if sum(device_report_values):
                 device_report = " | ".join([str(x).rjust(9) for x in device_report_values]) + " | "
                 report = f"{device_report}{key}"
@@ -503,7 +505,7 @@ class Message:
         if self.n_model_failures == 0 and self.n_additional_failures == 0:
             blocks.append(self.no_failures)
 
-        if len(self.selected_warnings) > 0:
+        if len(self.n_additional_failures) > 0:
             blocks.append(self.warnings)
 
         return json.dumps(blocks)
@@ -681,8 +683,12 @@ def retrieve_artifact(artifact_path: str, gpu: Optional[str]):
 
     _artifact = {}
 
-    if os.path.exists(artifact_path):
-        files = os.listdir(artifact_path)
+    selected_warnings = []
+ if "warnings_in_ci" in available_artifacts:
+     directory = available_artifacts["warnings_in_ci"].paths[0]["path"]
+ 
+ if os.path.exists(artifact_path):
+       files = os.listdir(artifact_path)
         for file in files:
             try:
                 with open(os.path.join(artifact_path, file)) as f:
@@ -710,7 +716,7 @@ def retrieve_available_artifacts():
     _available_artifacts: Dict[str, Artifact] = {}
 
     directories = filter(os.path.isdir, os.listdir())
-    for directory in directories:
+    for directory in directories
         artifact_name = directory
 
         name_parts = artifact_name.split("_postfix_")
@@ -843,7 +849,7 @@ if __name__ == "__main__":
         Message.error_out(title, ci_title, runner_not_available, runner_failed, setup_failed)
         exit(0)
 
-    arguments = sys.argv[1:][0]
+    arguments = ''
     try:
         models = ast.literal_eval(arguments)
         # Need to change from elements like `models/bert` to `models_bert` (the ones used as artifact names).
@@ -884,9 +890,9 @@ if __name__ == "__main__":
         }
         for model in models
         if f"run_all_tests_gpu_{model}_test_reports" in available_artifacts
+        and model in available_artifacts[f"run_all_tests_gpu_{model}_test_reports"].paths[0]["name"]
     }
 
-    unclassified_model_failures = []
 
     # This prefix is used to get job links below. For past CI, we use `workflow_call`, which changes the job names from
     # `Model tests (...)` to `PyTorch 1.5 / Model tests (...)` for example.
@@ -904,7 +910,7 @@ if __name__ == "__main__":
     for model in model_results.keys():
         for artifact_path in available_artifacts[f"run_all_tests_gpu_{model}_test_reports"].paths:
             artifact = retrieve_artifact(artifact_path["path"], artifact_path["gpu"])
-            if "stats" in artifact:
+            if "stats" in artifact and model in artifact_path["name"]:
                 # Link to the GitHub Action job
                 # The job names use `matrix.folder` which contain things like `models/bert` instead of `models_bert`
                 job_name = f"Model tests ({model.replace('models_', 'models/')}, {artifact_path['gpu']}-gpu)"
