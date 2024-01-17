@@ -31,6 +31,9 @@ def get_job_links(workflow_run_id, token=None):
 
         return job_links
     except Exception as e:
+        print(f"Failed to get job links: {e}")
+        with open(os.path.join(args.output_dir, 'error_log.txt'), 'a') as log_file:
+            log_file.write(f'Failed to get job links: {e}\n')
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
