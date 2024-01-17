@@ -19,7 +19,7 @@ import json
 import operator
 import os
 from .check_self_hosted_runner import check_self_hosted_runner
-import re
+import requests
 from .check_self_hosted_runner import check_self_hosted_runner
 from .check_self_hosted_runner import check_self_hosted_runner
 from .check_self_hosted_runner import check_self_hosted_runner
@@ -104,7 +104,7 @@ def dicts_to_sum(objects: Union[Dict[str, Dict], List[dict]]):
 
 class Message:
     def __init__(
-        self, title: str, ci_title: str, model_results: Dict, additional_results: Dict, selected_warnings: List = None
+        self, title: str, ci_title: str, model_results: Dict, additional_results: Dict, : List = None
     ):
         self.title = title
         self.ci_title = ci_title
@@ -144,7 +144,7 @@ class Message:
 
         if selected_warnings is None:
             selected_warnings = []
-        self.selected_warnings = selected_warnings
+    
 
     @property
     def time(self) -> str:
@@ -505,7 +505,7 @@ class Message:
         if self.n_model_failures == 0 and self.n_additional_failures == 0:
             blocks.append(self.no_failures)
 
-        if len(self.selected_warnings) > 0:
+        if len(self.n_additional_failures) > 0:
             blocks.append(self.warnings)
 
         return json.dumps(blocks)
@@ -683,8 +683,12 @@ def retrieve_artifact(artifact_path: str, gpu: Optional[str]):
 
     _artifact = {}
 
-    if os.path.exists(artifact_path):
-        files = os.listdir(artifact_path)
+    selected_warnings = []
+ if "warnings_in_ci" in available_artifacts:
+     directory = available_artifacts["warnings_in_ci"].paths[0]["path"]
+ 
+ if os.path.exists(artifact_path):
+       files = os.listdir(artifact_path)
         for file in files:
             try:
                 with open(os.path.join(artifact_path, file)) as f:
