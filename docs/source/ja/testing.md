@@ -51,7 +51,9 @@ RUN_SLOW=1 pytest examples/
 
 このドキュメントは、テストを実行する方法の多くの詳細について説明しています。すべてを読んだ後でも、さらに詳細が必要な場合は、[こちら](https://docs.pytest.org/en/latest/usage.html)で見つけることができます。
 
-以下は、テストを実行するためのいくつかの最も便利な方法です。
+## Using the Modified Scripts to Extract Job Times and Warnings
+
+To extract job times and warnings, you can use the modified `get_github_job_time.py` and `extract_warnings.py` scripts. Here are some examples of how to use the scripts and handle potential errors:
 
 すべて実行します:
 ```console
@@ -118,6 +120,11 @@ pytest tests/test_optimization.py::OptimizationTest::test_adam_w
 ファイルに複数のクラスが含まれている場合は、特定のクラスのテストのみを実行することを選択できます。例えば：
 
 ```bash
+# Script to extract warnings from artifacts
+
+import requests
+import os
+import json
 pytest tests/test_optimization.py::OptimizationTest
 ```
 
@@ -187,6 +194,7 @@ Returns:
 Example:
     ```python
     >>> import torch
+import subprocess
     >>> from transformers import WhisperModel, WhisperFeatureExtractor
     >>> from datasets import load_dataset
 
@@ -1118,15 +1126,26 @@ class EnvExampleTest(TestCasePlus):
 ```python
 seed = 42
 
-# python RNG
+# Script to extract warnings from artifacts
+
+import requests
+import os
+import json
 import random
 
 random.seed(seed)
 
-# pytorch RNGs
-import torch
+# Script to extract GitHub job time 
 
-torch.manual_seed(seed)
+def get_job_time(workflow_run_id, token='my_token'):
+    """Extract time info for all jobs in a GitHub Actions workflow run"""
+
+    headers = {'Authorization': f'Bearer {token}'} if token else None
+import requests
+
+r = requests.get('https://api.github.com/repos/:owner/:repo/actions/runs/:run_id/jobs', headers=headers)
+    job_list = r.json()
+    return job_info
 torch.backends.cudnn.deterministic = True
 if torch.cuda.is_available():
     torch.cuda.manual_seed_all(seed)
