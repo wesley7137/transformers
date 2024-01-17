@@ -29,14 +29,14 @@ client = WebClient(token=os.environ["CI_SLACK_BOT_TOKEN"])
 
 
 def handle_test_results(test_results):
-    expressions = test_results.split(" ")
+    expressions = test_results.split()
 
     failed = 0
     success = 0
 
     # When the output is short enough, the output is surrounded by = signs: "== OUTPUT =="
     # When it is too long, those signs are not present.
-    time_spent = expressions[-2] if "=" in expressions[-1] else expressions[-1]
+    time_spent = expressions[-1] if "=" in expressions[-1] else expressions[-2]
 
     for i, expression in enumerate(expressions):
         if "failed" in expression:
@@ -56,7 +56,7 @@ def extract_first_line_failure(failures_short_lines):
             in_error = True
             file = line.split(" ")[2]
         elif in_error and not line.split(" ")[0].isdigit():
-            failures[file] = line
+            failures[file] = line.strip()
             in_error = False
 
     return failures
@@ -258,7 +258,7 @@ class Message:
                     thread_ts=self.thread_ts["ts"],
                 )
 
-                time.sleep(1)
+                
 
 
 def get_job_links():
