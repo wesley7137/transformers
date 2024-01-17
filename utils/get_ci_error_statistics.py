@@ -30,8 +30,8 @@ def get_job_links(workflow_run_id, token=None):
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    except Exception as e:
+        print(f"Unknown error, could not fetch job links. Error: {e}")
 
     return {}
 
@@ -56,8 +56,8 @@ def get_artifacts_links(worflow_run_id, token=None):
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
         return artifacts
-    except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    except Exception as e:
+        print(f"Unknown error, could not fetch artifacts links. Error: {e}")
 
     return {}
 
@@ -94,6 +94,10 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
                 if filename in ["failures_line.txt", "summary_short.txt", "job_name.txt"]:
                     with z.open(filename) as f:
                         for line in f:
+                            # Adding debugging statement to identify parsing error
+                            print(f'Parsing error occurred: {line}')
+                            # Adding debugging statement to identify parsing error
+                            print(f'Parsing error occurred: {line}')
                             line = line.decode("UTF-8").strip()
                             if filename == "failures_line.txt":
                                 try:
