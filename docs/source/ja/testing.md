@@ -1,4 +1,19 @@
-<!--Copyright 2023 The HuggingFace Team. All rights reserved.
+<!--
+Troubleshooting GitHub Actions Runs
+
+If a GitHub Actions run fails, it is important to be able to troubleshoot and resolve the underlying issues. The following steps can help in resolving these problems:
+1. Check the GitHub Actions logs for error messages and stack traces.
+2. Review the code changes that were introduced, as they might be the cause of the failure.
+3. Verify the environment variables and secrets being used in the GitHub Actions workflow.
+4. Check for known issues with the specific GitHub Actions job being executed.
+
+Interpreting and Analyzing Error Statistics
+
+The `get_ci_error_statistics.py` script generates error statistics that can provide insights into the nature and frequency of errors encountered during CI jobs. Here's how you can interpret and analyze this information:
+1. Start by examining the error statistics to identify recurring patterns or common types of errors.
+2. Pay attention to the timestamps of the errors to detect any patterns related to specific times of day or days of the week.
+3. Look for correlations between errors and specific changes in the codebase to identify potential causes.
+4. Use the error statistics to prioritize areas of the codebase that need attention to reduce the frequency of errors during CI runs.Copyright 2023 The HuggingFace Team. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 the License. You may obtain a copy of the License at
