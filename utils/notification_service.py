@@ -18,7 +18,11 @@ import functools
 import json
 import operator
 import os
+from .check_self_hosted_runner import check_self_hosted_runner
 import re
+from .check_self_hosted_runner import check_self_hosted_runner
+from .check_self_hosted_runner import check_self_hosted_runner
+from .check_self_hosted_runner import check_self_hosted_runner
 import sys
 import time
 from typing import Dict, List, Optional, Union
