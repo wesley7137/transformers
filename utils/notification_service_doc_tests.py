@@ -285,6 +285,8 @@ def get_job_links():
 def retrieve_artifact(name: str):
     _artifact = {}
 
+    if name=='doc_tests_gpu_test_reports':
+        return available_artifacts[name]
     if os.path.exists(name):
         files = os.listdir(name)
         for file in files:
@@ -314,8 +316,8 @@ def retrieve_available_artifacts():
     directories = filter(os.path.isdir, os.listdir())
     for directory in directories:
         artifact_name = directory
-        if artifact_name not in _available_artifacts:
-            _available_artifacts[artifact_name] = Artifact(artifact_name)
+        if artifact_name not in _available_artifacts or artifact_name=='doc_tests_gpu_test_reports':
+            _available_artifacts[artifact_name]=_available_artifacts.get(artifact_name,Artifact(artifact_name))
 
             _available_artifacts[artifact_name].add_path(directory)
 
