@@ -37,7 +37,7 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                 line = line.strip()
                 buffer.append(line)
 
-    if from_gh:
+    if not from_gh:
         for filename in os.listdir(artifact_path):
             file_path = os.path.join(artifact_path, filename)
             if not os.path.isdir(file_path):
@@ -48,7 +48,7 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                     parse_line(fp)
     else:
         try:
-            with zipfile.ZipFile(artifact_path) as z:
+            with zipfile.ZipFile(artifact_path, 'r') as z:
                 for filename in z.namelist():
                     if not os.path.isdir(filename):
                         # read the file
