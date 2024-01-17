@@ -887,9 +887,9 @@ if __name__ == "__main__":
         }
         for model in models
         if f"run_all_tests_gpu_{model}_test_reports" in available_artifacts
+        and model in available_artifacts[f"run_all_tests_gpu_{model}_test_reports"].paths[0]["name"]
     }
 
-    unclassified_model_failures = []
 
     # This prefix is used to get job links below. For past CI, we use `workflow_call`, which changes the job names from
     # `Model tests (...)` to `PyTorch 1.5 / Model tests (...)` for example.
@@ -907,7 +907,7 @@ if __name__ == "__main__":
     for model in model_results.keys():
         for artifact_path in available_artifacts[f"run_all_tests_gpu_{model}_test_reports"].paths:
             artifact = retrieve_artifact(artifact_path["path"], artifact_path["gpu"])
-            if "stats" in artifact:
+            if "stats" in artifact and model in artifact_path["name"]:
                 # Link to the GitHub Action job
                 # The job names use `matrix.folder` which contain things like `models/bert` instead of `models_bert`
                 job_name = f"Model tests ({model.replace('models_', 'models/')}, {artifact_path['gpu']}-gpu)"
