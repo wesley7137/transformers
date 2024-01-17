@@ -127,16 +127,15 @@ class Message:
         self.n_additional_single_gpu_failures = all_additional_failures["single"]
         self.n_additional_multi_gpu_failures = all_additional_failures["multi"]
         self.n_additional_unknown_gpu_failures = all_additional_failures["unclassified"]
-        self.n_additional_failures = (
-            self.n_additional_single_gpu_failures
+
             + self.n_additional_multi_gpu_failures
             + self.n_additional_unknown_gpu_failures
         )
 
         # Results
-        self.n_failures = self.n_model_failures + self.n_additional_failures
-        self.n_success = self.n_model_success + self.n_additional_success
-        self.n_tests = self.n_failures + self.n_success
+        self.n_failures = self.n_model_failures
+        self.n_success = self.n_model_success
+        self.n_tests = self.n_failures + self.n_model_success
 
         self.model_results = model_results
         self.additional_results = additional_results
@@ -713,7 +712,7 @@ def retrieve_available_artifacts():
     _available_artifacts: Dict[str, Artifact] = {}
 
     directories = filter(os.path.isdir, os.listdir())
-    for directory in directories:
+    for directory in directories
         artifact_name = directory
 
         name_parts = artifact_name.split("_postfix_")
