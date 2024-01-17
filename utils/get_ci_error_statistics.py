@@ -223,6 +223,11 @@ if __name__ == "__main__":
         required=True,
         help="Where to store the downloaded artifacts and other result files.",
     )
+    parser.add_argument(
+        "--token",
+        type=str,
+        help="A token that has actions:read permission.",
+    )
     parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
     args = parser.parse_args()
 
