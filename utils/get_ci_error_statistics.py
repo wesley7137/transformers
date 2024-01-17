@@ -223,6 +223,11 @@ if __name__ == "__main__":
         required=True,
         help="Where to store the downloaded artifacts and other result files.",
     )
+    parser.add_argument(
+        "--token",
+        type=str,
+        help="A token that has actions:read permission.",
+    )
     parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
     args = parser.parse_args()
 
@@ -265,8 +270,8 @@ if __name__ == "__main__":
     with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
         json.dump(errors, fp, ensure_ascii=False, indent=4)
 
-    reduced_by_error = reduce_by_error(errors)
-    reduced_by_model = reduce_by_model(errors)
+    reduced_by_error = reduce_by_error(errors, error_filter=None)
+    reduced_by_model = reduce_by_model(errors, error_filter=None)
 
     s1 = make_github_table(reduced_by_error)
     s2 = make_github_table_per_model(reduced_by_model)
