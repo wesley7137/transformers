@@ -54,14 +54,13 @@ def get_job_time(workflow_run_id, token=None):
 
 if __name__ == "__main__":
     r"""
-    Example:
 
-        python get_github_job_time.py --workflow_run_id 2945609517
     """
 
     parser = argparse.ArgumentParser()
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
+    parser.add_argument("--token", type=str, required=False, help="The authorization token.")
     args = parser.parse_args()
 
     job_time = get_job_time(args.workflow_run_id)
