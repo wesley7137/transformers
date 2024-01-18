@@ -223,30 +223,7 @@ def make_github_table_per_model(reduced_by_model):
         line = f"| {model} | {count} | {error[:60]} | {_count} |"
         lines.append(line)
 
-    return "\n".join(lines)
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    # Required parameters
-    parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
-    parser.add_argument(
-        "--output_dir",
-        type=str,
-        required=True,
-        help="Where to store the downloaded artifacts and other result files.",
-    )
-    parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
-    args = parser.parse_args()
-
-    os.makedirs(args.output_dir, exist_ok=True)
-
-    _job_links = get_job_links(args.workflow_run_id, token=args.token)
-    job_links = {}
-    # To deal with `workflow_call` event, where a job name is the combination of the job names in the caller and callee.
-    # For example, `PyTorch 1.11 / Model tests (models/albert, single-gpu)`.
-    if _job_links:
-        for k, v in _job_links.items():
+new line(s) to replace
             # This is how GitHub actions combine job names.
             if " / " in k:
                 index = k.find(" / ")
@@ -277,6 +254,7 @@ if __name__ == "__main__":
 
     with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
         json.dump(errors, fp, ensure_ascii=False, indent=4)
+new line(s) to append to snippet 0
 
     reduced_by_error = reduce_by_error(errors)
     reduced_by_model = reduce_by_model(errors)
