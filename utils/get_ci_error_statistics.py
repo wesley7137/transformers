@@ -26,11 +26,11 @@ def get_job_links(workflow_run_id, token=None):
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
         for i in range(pages_to_iterate_over):
-            result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+            response = requests.get(url + f"&page={i + 2}", headers=headers)
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
+    except Exception as e:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
@@ -52,11 +52,11 @@ def get_artifacts_links(worflow_run_id, token=None):
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
         for i in range(pages_to_iterate_over):
-            result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+            response = requests.get(url + f"&page={i + 2}", headers=headers)
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
         return artifacts
-    except Exception:
+    except Exception as e:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
@@ -247,7 +247,10 @@ if __name__ == "__main__":
         json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 
     for idx, (name, url) in enumerate(artifacts.items()):
-        download_artifact(name, url, args.output_dir, args.token)
+        try:
+            download_artifact(name, url, args.output_dir, args.token)
+        except Exception as e:
+            print(f"Error downloading artifact ({name}): {e}")
         # Be gentle to GitHub
         time.sleep(1)
 
