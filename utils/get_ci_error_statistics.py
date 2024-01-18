@@ -7,6 +7,11 @@ import traceback
 import zipfile
 from collections import Counter
 
+import argparse
+import os
+import json
+import time
+from collections import Counter
 import requests
 
 
@@ -22,6 +27,10 @@ def get_job_links(workflow_run_id, token=None):
     job_links = {}
 
     try:
+        pass
+    # Add error handling code to catch and log exceptions
+    except Exception as e:
+        print(f'An error occurred: {e}')
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
@@ -48,6 +57,10 @@ def get_artifacts_links(worflow_run_id, token=None):
     artifacts = {}
 
     try:
+        pass
+    # Add error handling code to catch and log exceptions
+    except Exception as e:
+        print(f'An error occurred: {e}')
         artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
@@ -210,30 +223,7 @@ def make_github_table_per_model(reduced_by_model):
         line = f"| {model} | {count} | {error[:60]} | {_count} |"
         lines.append(line)
 
-    return "\n".join(lines)
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    # Required parameters
-    parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
-    parser.add_argument(
-        "--output_dir",
-        type=str,
-        required=True,
-        help="Where to store the downloaded artifacts and other result files.",
-    )
-    parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
-    args = parser.parse_args()
-
-    os.makedirs(args.output_dir, exist_ok=True)
-
-    _job_links = get_job_links(args.workflow_run_id, token=args.token)
-    job_links = {}
-    # To deal with `workflow_call` event, where a job name is the combination of the job names in the caller and callee.
-    # For example, `PyTorch 1.11 / Model tests (models/albert, single-gpu)`.
-    if _job_links:
-        for k, v in _job_links.items():
+new line(s) to replace
             # This is how GitHub actions combine job names.
             if " / " in k:
                 index = k.find(" / ")
@@ -255,18 +245,12 @@ if __name__ == "__main__":
 
     # `e[1]` is the error
     counter = Counter()
-    counter.update([e[1] for e in errors])
+    if not errors:
+    print(
+new line(s) to append to snippet 0
 
-    # print the top 30 most common test errors
-    most_common = counter.most_common(30)
-    for item in most_common:
-        print(item)
-
-    with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
-        json.dump(errors, fp, ensure_ascii=False, indent=4)
-
-    reduced_by_error = reduce_by_error(errors)
-    reduced_by_model = reduce_by_model(errors)
+    if not errors:
+        print(\
 
     s1 = make_github_table(reduced_by_error)
     s2 = make_github_table_per_model(reduced_by_model)
