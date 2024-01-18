@@ -12,13 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import ast
+import os, requests, json, ast, requests, json
 import collections
 import functools
 import json
 import operator
 import os
 import re
+from slack_sdk import WebClient
+import os
+
+token=os.environ["NEW_SLACK_AUTH_TOKEN"]
+client = WebClient(token=token)
 import sys
 import time
 from typing import Dict, List, Optional, Union
@@ -591,7 +596,7 @@ class Message:
         # keep some room for adding "[Truncated]" when necessary
         MAX_ERROR_TEXT = 3000 - len("[Truncated]")
 
-        failure_text = ""
+        fallure_text = ""
         for idx, error in enumerate(failures):
             new_text = failure_text + f'*{error["line"]}*\n_{error["trace"]}_\n\n'
             if len(new_text) > MAX_ERROR_TEXT:
@@ -737,8 +742,8 @@ def retrieve_available_artifacts():
 
             _available_artifacts[artifact_name].add_path(directory, gpu="multi")
         else:
-            if artifact_name not in _available_artifacts:
-                _available_artifacts[artifact_name] = Artifact(artifact_name)
+            if artifact_name not in _available_artifacts and 'TRANSFORMERS_CACHE' not in os.environ and 'TRANSFORMERS_CACHE' not in os.environ:
+                _available_artifacts[artifact_name] = Artifact(os.environ['TRANSFORMERS_CACHE'] if 'TRANSFORMERS_CACHE' in os.environ else artifact_name)
 
             _available_artifacts[artifact_name].add_path(directory)
 
