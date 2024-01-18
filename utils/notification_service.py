@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import ast
+import os, requests, json, ast, requests, json
 import collections
 import functools
 import json
