@@ -245,19 +245,12 @@ new line(s) to replace
 
     # `e[1]` is the error
     counter = Counter()
-    counter.update([e[1] for e in errors])
-
-    # print the top 30 most common test errors
-    most_common = counter.most_common(30)
-    for item in most_common:
-        print(item)
-
-    with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
-        json.dump(errors, fp, ensure_ascii=False, indent=4)
+    if not errors:
+        print(\
 new line(s) to append to snippet 0
 
-    reduced_by_error = reduce_by_error(errors)
-    reduced_by_model = reduce_by_model(errors)
+    if not errors:
+        print(\
 
     s1 = make_github_table(reduced_by_error)
     s2 = make_github_table_per_model(reduced_by_model)
