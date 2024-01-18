@@ -19,6 +19,11 @@ import json
 import operator
 import os
 import re
+from slack_sdk import WebClient
+import os
+
+token=os.environ["NEW_SLACK_AUTH_TOKEN"]
+client = WebClient(token=token)
 import sys
 import time
 from typing import Dict, List, Optional, Union
