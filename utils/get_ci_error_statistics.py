@@ -246,7 +246,7 @@ new line(s) to replace
     # `e[1]` is the error
     counter = Counter()
     if not errors:
-        print(\
+    print(
 new line(s) to append to snippet 0
 
     if not errors:
