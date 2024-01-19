@@ -80,6 +80,29 @@ if __name__ == "__main__":
 
     def list_str(values):
         return values.split(",")
+    if from_gh:
+        for filename in os.listdir(artifact_path):
+            file_path = os.path.join(artifact_path, filename)
+            if not os.path.isdir(file_path):
+                # read the file
+                if filename != "warnings.txt":
+                    continue
+                with open(file_path) as fp:
+                    parse_line(fp)
+    else:
+        try:
+            with zipfile.ZipFile(artifact_path) as z:
+                for filename in z.namelist():
+                    if not os.path.isdir(filename):
+                        # read the file
+                        if filename != "warnings.txt":
+                            continue
+                        with z.open(filename) as fp:
+                            parse_line(fp)
+        except Exception:
+            logger.warning(
+                f"{artifact_path} is either an invalid zip file or something else wrong. This file is skipped."
+            )
 
     parser = argparse.ArgumentParser()
     # Required parameters
@@ -112,7 +135,29 @@ if __name__ == "__main__":
         pass
     else:
         os.makedirs(args.output_dir, exist_ok=True)
+    return selected_warnings
 
+
+def extract_warnings(artifact_dir, targets):
+    """Extract warnings from all artifact files"""
+
+    selected_warnings = set()
+
+    paths = [os.path.join(artifact_dir, p) for p in os.listdir(artifact_dir) if (p.endswith(".zip") or from_gh)]
+    for p in paths:
+        selected_warnings.update(extract_warnings_from_single_artifact(p, targets))
+
+    return selected_warnings
+def extract_warnings(artifact_dir, targets):
+    """Extract warnings from all artifact files"""
+
+    selected_warnings = set()
+
+    paths = [os.path.join(artifact_dir, p) for p in os.listdir(artifact_dir) if (p.endswith(".zip") or from_gh)]
+    for p in paths:
+        selected_warnings.update(extract_warnings_from_single_artifact(p, targets))
+
+    return selected_warnings
         # get download links
         artifacts = get_artifacts_links(args.workflow_run_id, token=args.token)
         with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="UTF-8") as fp:
