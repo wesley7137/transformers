@@ -1,0 +1,21 @@
+import os
+import traceback
+
+def write_error_logs(error_logs):
+    try:
+        file_path = os.path.join(os.getcwd(), "error_logs.txt")
+        with open(file_path, "w") as file:
+            for error in error_logs:
+                file.write(error + "\n")
+    except Exception:
+        print(f"Unknown error, could not write error logs:\n{traceback.format_exc()}")
+    finally:
+        file.close()
+
+# Example usage:
+error_logs = [
+    "Error 1: Something went wrong",
+    "Error 2: Another error occurred",
+    "Error 3: Yet another error",
+]
+write_error_logs(error_logs)
