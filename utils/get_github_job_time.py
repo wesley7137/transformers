@@ -6,7 +6,7 @@ import dateutil.parser as date_parser
 import requests
 
 
-def extract_time_from_single_job(job):
+def extract_time_from_single_job(job: dict) -> dict:
     """Extract time info from a single job in a GitHub Actions workflow run"""
 
     job_info = {}
@@ -14,8 +14,12 @@ def extract_time_from_single_job(job):
     start = job["started_at"]
     end = job["completed_at"]
 
-    start_datetime = date_parser.parse(start)
-    end_datetime = date_parser.parse(end)
+    try:
+        start_datetime = date_parser.parse(start)
+        end_datetime = date_parser.parse(end)
+    except Exception as e:
+        print(f'Error occurred: {e}')
+        return {}
 
     duration_in_min = round((end_datetime - start_datetime).total_seconds() / 60.0)
 
