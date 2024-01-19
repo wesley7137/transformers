@@ -3,7 +3,7 @@ import json
 import math
 import os
 import time
-import traceback, sys
+import traceback, sys, zipfile
 import zipfile
 import traceback
 
@@ -34,6 +34,7 @@ def get_job_links(workflow_run_id, token=None):
         return job_links
     except Exception as e:
         print(traceback.format_exc())
+        print(e)
 
     return {}
 
