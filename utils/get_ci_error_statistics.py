@@ -31,7 +31,7 @@ def get_job_links(workflow_run_id, token=None):
 
         return job_links
     except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+        print(f"Failed to fetch job links due to an error:\n{traceback.format_exc()}")
 
     return {}
 
@@ -57,7 +57,7 @@ def get_artifacts_links(worflow_run_id, token=None):
 
         return artifacts
     except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+        print(f"Failed to fetch artifact links due to an error:\n{traceback.format_exc()}")
 
     return {}
 
@@ -273,5 +273,9 @@ if __name__ == "__main__":
 
     with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s1)
-    with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
-        fp.write(s2)
+
+    with open(os.path.join(args.output_dir, "reduced_by_error.md"), "w", encoding="UTF-8") as fp:
+        fp.write(s1)
+    
+    with open(os.path.join(args.output_dir, "reduced_by_model.json"), "w", encoding="UTF-8") as fp:
+        json.dump(s2, fp, ensure_ascii=False, indent=4)
