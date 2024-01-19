@@ -99,7 +99,7 @@ if __name__ == "__main__":
         help="Comma-separated list of target warning(s) which we want to extract.",
     )
     parser.add_argument(
-        "--from_gh",
+        "--from_gh_flag",
         action="store_true",
         help="If running from a GitHub action workflow and collecting warnings from its artifacts.",
     )
