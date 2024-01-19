@@ -49,7 +49,7 @@ jobs:
 
       - name: Run doctests
         run: |
-          python3 -m pytest -v --make-reports doc_tests_gpu --doctest-modules $(cat doc_tests.txt) -sv --doctest-continue-on-failure --doctest-glob="*.md"
+          python3 -m pytest -v --junitxml=report.xml --doctest-modules $(cat doc_tests.txt) --ignore=scripts --cov=transformers --doctest-glob="*.md"
 
       - name: Failure short reports
         if: ${{ failure() }}

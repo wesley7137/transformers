@@ -15,6 +15,9 @@ on:
       - ".github/**"
       - "templates/**"
       - "utils/**"
+      - "./*",".github/*"
+      - "templates/**"
+      - "utils/**"
   repository_dispatch:
 
 env:

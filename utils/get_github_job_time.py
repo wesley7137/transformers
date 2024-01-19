@@ -15,7 +15,11 @@ def extract_time_from_single_job(job):
     end = job["completed_at"]
 
     start_datetime = date_parser.parse(start)
-    end_datetime = date_parser.parse(end)
+    try:
+        end_datetime = date_parser.parse(end)
+    except Exception as e:
+        print(f'Error parsing end datetime: {e}')
+        return {}
 
     duration_in_min = round((end_datetime - start_datetime).total_seconds() / 60.0)
 
