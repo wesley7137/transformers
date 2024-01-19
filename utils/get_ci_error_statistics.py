@@ -26,8 +26,8 @@ def get_job_links(workflow_run_id, token=None):
 #         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
 #         for i in range(pages_to_iterate_over):
-#             result = requests.get(url + f"&page={i + 2}", headers=headers).json()
-#             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
+# result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+# job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
 #         return job_links
 #     except Exception:
