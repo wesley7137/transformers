@@ -13,7 +13,10 @@
 # limitations under the License.
 
 import collections
+import logging
+import os
 import json
+import zipfile as z
 import math
 import os
 import re
