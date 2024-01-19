@@ -32,8 +32,7 @@ def get_job_links(workflow_run_id, token=None):
         return job_links
     except Exception:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
-
-    return {}
+        return {}
 
 
 def get_artifacts_links(worflow_run_id, token=None):
@@ -58,8 +57,7 @@ def get_artifacts_links(worflow_run_id, token=None):
         return artifacts
     except Exception:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
-
-    return {}
+        return {}
 
 
 def download_artifact(artifact_name, artifact_url, output_dir, token):
@@ -73,12 +71,15 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     if token is not None:
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
-    result = requests.get(artifact_url, headers=headers, allow_redirects=False)
-    download_url = result.headers["Location"]
-    response = requests.get(download_url, allow_redirects=True)
-    file_path = os.path.join(output_dir, f"{artifact_name}.zip")
-    with open(file_path, "wb") as fp:
-        fp.write(response.content)
+    try:
+        result = requests.get(artifact_url, headers=headers, allow_redirects=False)
+        download_url = result.headers["Location"]
+        response = requests.get(download_url, allow_redirects=True)
+        file_path = os.path.join(output_dir, f"{artifact_name}.zip")
+        with open(file_path, "wb") as fp:
+            fp.write(response.content)
+    except Exception:
+        print(f"Unknown error, could not download artifact:\n{traceback.format_exc()}")
 
 
 def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
@@ -111,9 +112,19 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
                             elif filename == "job_name.txt":
                                 job_name = line
 
-    if len(errors) != len(failed_tests):
+    try:
+        if len(errors) != len(failed_tests):
+            raise ValueError(
+                f"`errors` and `failed_tests` should have the same number of elements. Got {len(errors)} for `errors` "
+                f"and {len(failed_tests)} for `failed_tests` instead. The test reports in {artifact_zip_path} have some"
+                " problem."
+            )
+    except Exception:
         raise ValueError(
             f"`errors` and `failed_tests` should have the same number of elements. Got {len(errors)} for `errors` "
+            f"and {len(failed_tests)} for `failed_tests` instead. The test reports in {artifact_zip_path} have some"
+            " problem."
+        ) from None
             f"and {len(failed_tests)} for `failed_tests` instead. The test reports in {artifact_zip_path} have some"
             " problem."
         )
@@ -146,13 +157,17 @@ def reduce_by_error(logs, error_filter=None):
     counter = Counter()
     counter.update([x[1] for x in logs])
     counts = counter.most_common()
-    r = {}
-    for error, count in counts:
-        if error_filter is None or error not in error_filter:
-            r[error] = {"count": count, "failed_tests": [(x[2], x[0]) for x in logs if x[1] == error]}
+    try:
+        r = {}
+        for error, count in counts:
+            if error_filter is None or error not in error_filter:
+                r[error] = {"count": count, "failed_tests": [(x[2], x[0]) for x in logs if x[1] == error]}
 
-    r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
-    return r
+        r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
+        return r
+    except Exception:
+        print(f"Unknown error, could not reduce errors:\n{traceback.format_exc()}")
+        return {}
 
 
 def get_model(test):
