@@ -30,8 +30,9 @@ def get_job_links(workflow_run_id, token=None):
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    except Exception as e:
+        print(f"Error during job links retrieval: {e}")
+        print(f"Unknown error, could not fetch links:\n{e}\n{traceback.format_exc()}")
 
     return {}
 
@@ -56,8 +57,9 @@ def get_artifacts_links(worflow_run_id, token=None):
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
         return artifacts
-    except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    except Exception as e:
+        print(f"Error during artifacts retrieval: {e}")
+        print(f"Unknown error, could not fetch links:\n{e}\n{traceback.format_exc()}")
 
     return {}
 
@@ -216,14 +218,14 @@ def make_github_table_per_model(reduced_by_model):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # Required parameters
-    parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
+    parser.add_argument("--workflow_run_id", type=str, required=True, help="The GitHub Actions workflow run id. To obtain the workflow run ID, go to the Actions tab in the repository and select the workflow run you want. The workflow run ID is present in the URL.")
     parser.add_argument(
         "--output_dir",
         type=str,
         required=True,
-        help="Where to store the downloaded artifacts and other result files.",
+        help="The directory path where the downloaded artifacts and other result files will be stored.",
     )
-    parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
+    parser.add_argument("--token", default=None, type=str, help="A token with 'actions:read' permission is required to access the GitHub API. You can create a personal access token with the 'actions:read' permission in the Developer settings of your GitHub account.")
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -258,7 +260,10 @@ if __name__ == "__main__":
     counter.update([e[1] for e in errors])
 
     # print the top 30 most common test errors
-    most_common = counter.most_common(30)
+    try:
+        most_common = counter.most_common(30)
+    except Exception as e:
+        print(f"Error during counter update retrieval: {e}")
     for item in most_common:
         print(item)
 
