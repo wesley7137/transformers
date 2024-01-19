@@ -258,7 +258,7 @@ if __name__ == "__main__":
         json.dump(job_links, fp, ensure_ascii=False, indent=4)
 
     artifacts = get_artifacts_links(args.workflow_run_id, token=args.token)
-    with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="UTF-8") as fp:
+    with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="utf-8") as fp:
         json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 
     for idx, (name, url) in enumerate(artifacts.items()):
@@ -285,7 +285,7 @@ if __name__ == "__main__":
     s1 = make_github_table(reduced_by_error)
     s2 = make_github_table_per_model(reduced_by_model)
 
-    with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
+    with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="utf-8") as fp:
         fp.write(s1)
-    with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
+    with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="utf-8") as fp:
         fp.write(s2)
