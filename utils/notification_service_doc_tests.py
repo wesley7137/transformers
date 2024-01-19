@@ -21,6 +21,7 @@ import time
 from fnmatch import fnmatch
 from typing import Dict
 
+from utils.get_github_job_time import get_job_time
 import requests
 from slack_sdk import WebClient
 
@@ -258,7 +259,7 @@ class Message:
                     thread_ts=self.thread_ts["ts"],
                 )
 
-                time.sleep(1)
+
 
 
 def get_job_links():
