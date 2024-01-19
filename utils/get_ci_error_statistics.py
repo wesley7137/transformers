@@ -8,6 +8,14 @@ import zipfile
 from collections import Counter
 
 import requests
+import os
+import zipfile
+import traceback
+import json
+import math
+import argparse
+import time
+from collections import Counter
 
 
 def get_job_links(workflow_run_id, token=None):
@@ -34,6 +42,17 @@ def get_job_links(workflow_run_id, token=None):
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
+        artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
+        pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
+    
+        for i in range(pages_to_iterate_over):
+            result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+            artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
+    
+        return artifacts
+    except Exception:
+        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+        return {}
 
 
 def get_artifacts_links(worflow_run_id, token=None):
@@ -55,11 +74,15 @@ def get_artifacts_links(worflow_run_id, token=None):
             result = requests.get(url + f"&page={i + 2}", headers=headers).json()
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
-        return artifacts
+    file_path = os.path.join(output_dir, f"{artifact_name}.zip")
+    with open(file_path, "wb") as fp:
+        fp.write(response.content)
     except Exception:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
-    return {}
+    file_path = os.path.join(output_dir, f"{artifact_name}.zip")
+    with open(file_path, "wb") as fp:
+        fp.write(response.content)
 
 
 def download_artifact(artifact_name, artifact_url, output_dir, token):
@@ -144,7 +167,7 @@ def reduce_by_error(logs, error_filter=None):
     """count each error"""
 
     counter = Counter()
-    counter.update([x[1] for x in logs])
+    counter.update([x[1] for x in logs if error_filter is None or x[1] not in error_filter])
     counts = counter.most_common()
     r = {}
     for error, count in counts:
@@ -243,14 +266,13 @@ if __name__ == "__main__":
         json.dump(job_links, fp, ensure_ascii=False, indent=4)
 
     artifacts = get_artifacts_links(args.workflow_run_id, token=args.token)
-    with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="UTF-8") as fp:
+    with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="utf-8") as fp:
         json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 
     for idx, (name, url) in enumerate(artifacts.items()):
         download_artifact(name, url, args.output_dir, args.token)
         # Be gentle to GitHub
         time.sleep(1)
-
     errors = get_all_errors(args.output_dir, job_links=job_links)
 
     # `e[1]` is the error
@@ -271,7 +293,7 @@ if __name__ == "__main__":
     s1 = make_github_table(reduced_by_error)
     s2 = make_github_table_per_model(reduced_by_model)
 
-    with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
+    with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="utf-8") as fp:
         fp.write(s1)
-    with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
+    with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="utf-8") as fp:
         fp.write(s2)
