@@ -8,6 +8,7 @@ import zipfile
 import traceback
 
 import requests
+import traceback
 from collections import Counter
 
 
@@ -32,6 +33,7 @@ def get_job_links(workflow_run_id, token=None):
 
         return job_links
     except Exception as e:
+        print(e)
         print(f"Unknown error, could not fetch links:\n{e}\n{traceback.format_exc()}")
 
     return {}
