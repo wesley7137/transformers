@@ -30,8 +30,8 @@ def get_job_links(workflow_run_id, token=None):
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    except Exception as e:
+        print(f"Unknown error, could not fetch links:\n{e}")
 
     return {}
 
@@ -56,8 +56,8 @@ def get_artifacts_links(worflow_run_id, token=None):
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
         return artifacts
-    except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    except Exception as e:
+        print(f"Unknown error, could not fetch links:\n{e}")
 
     return {}
 
@@ -77,7 +77,7 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     download_url = result.headers["Location"]
     response = requests.get(download_url, allow_redirects=True)
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
-    with open(file_path, "wb") as fp:
+    with open(file_path, "wb", encoding="UTF-8") as fp:
         fp.write(response.content)
 
 
@@ -87,7 +87,7 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
     failed_tests = []
     job_name = None
 
-    with zipfile.ZipFile(artifact_zip_path) as z:
+    with zipfile.ZipFile(artifact_zip_path, 'r') as z:
         for filename in z.namelist():
             if not os.path.isdir(filename):
                 # read the file
@@ -252,15 +252,6 @@ if __name__ == "__main__":
         time.sleep(1)
 
     errors = get_all_errors(args.output_dir, job_links=job_links)
-
-    # `e[1]` is the error
-    counter = Counter()
-    counter.update([e[1] for e in errors])
-
-    # print the top 30 most common test errors
-    most_common = counter.most_common(30)
-    for item in most_common:
-        print(item)
 
     with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
         json.dump(errors, fp, ensure_ascii=False, indent=4)
