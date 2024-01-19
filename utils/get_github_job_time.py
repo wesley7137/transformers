@@ -47,6 +47,7 @@ def get_job_time(workflow_run_id, token=None):
 
         return job_time
     except Exception:
+        return job_time
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
