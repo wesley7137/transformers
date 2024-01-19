@@ -250,7 +250,6 @@ if __name__ == "__main__":
         download_artifact(name, url, args.output_dir, args.token)
         # Be gentle to GitHub
         time.sleep(1)
-
     errors = get_all_errors(args.output_dir, job_links=job_links)
 
     # `e[1]` is the error
