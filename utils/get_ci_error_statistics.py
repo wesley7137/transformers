@@ -57,7 +57,7 @@ def get_artifacts_links(worflow_run_id, token=None):
 
         return artifacts
     except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+        print(f"Failed to fetch artifact links due to an error:\n{traceback.format_exc()}")
 
     return {}
 
