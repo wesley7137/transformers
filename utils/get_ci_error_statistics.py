@@ -31,6 +31,7 @@ def get_job_links(workflow_run_id, token=None):
 
         return job_links
     except Exception as e:
+        print(f"Error during job links retrieval: {e}")
         print(f"Unknown error, could not fetch links:\n{e}\n{traceback.format_exc()}")
 
     return {}
@@ -57,6 +58,7 @@ def get_artifacts_links(worflow_run_id, token=None):
 
         return artifacts
     except Exception as e:
+        print(f"Error during artifacts retrieval: {e}")
         print(f"Unknown error, could not fetch links:\n{e}\n{traceback.format_exc()}")
 
     return {}
@@ -258,7 +260,10 @@ if __name__ == "__main__":
     counter.update([e[1] for e in errors])
 
     # print the top 30 most common test errors
-    most_common = counter.most_common(30)
+    try:
+        most_common = counter.most_common(30)
+    except Exception as e:
+        print(f"Error during counter update retrieval: {e}")
     for item in most_common:
         print(item)
 
