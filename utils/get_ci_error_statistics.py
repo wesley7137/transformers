@@ -8,6 +8,7 @@ import zipfile
 from collections import Counter
 
 import requests
+from requests.exceptions import RequestException
 
 
 def get_job_links(workflow_run_id, token=None):
@@ -18,7 +19,11 @@ def get_job_links(workflow_run_id, token=None):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
-    result = requests.get(url, headers=headers).json()
+    try:
+        result = requests.get(url, headers=headers).json()
+    except requests.exceptions.RequestException as e:
+        print(f'Error during job name and link extraction: {e}')
+        result = {}
     job_links = {}
 
     try:
