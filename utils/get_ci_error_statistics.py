@@ -277,3 +277,4 @@ for idx, (name, url) in enumerate(artifacts.items()):
         fp.write(s1)
     with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s2)
+print("get_ci_error_statistics.py script completed successfully.")
