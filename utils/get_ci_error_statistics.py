@@ -214,6 +214,7 @@ def make_github_table_per_model(reduced_by_model):
 
 
 if __name__ == "__main__":
+    print("Starting get_ci_error_statistics.py script...")
     parser = argparse.ArgumentParser()
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run ID. This should be provided as an input to the workflow run.")
@@ -246,7 +247,8 @@ if __name__ == "__main__":
     with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="UTF-8") as fp:
         json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 
-    # for idx, (name, url) in enumerate(artifacts.items()):
+    print("Replacing download_artifact loop...")
+for idx, (name, url) in enumerate(artifacts.items()):
     #     download_artifact(name, url, args.output_dir, args.token)
     #     # Be gentle to GitHub
     #     time.sleep(1)
