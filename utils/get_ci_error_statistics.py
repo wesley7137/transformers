@@ -246,10 +246,10 @@ if __name__ == "__main__":
     with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="UTF-8") as fp:
         json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 
-    for idx, (name, url) in enumerate(artifacts.items()):
-        download_artifact(name, url, args.output_dir, args.token)
-        # Be gentle to GitHub
-        time.sleep(1)
+    # for idx, (name, url) in enumerate(artifacts.items()):
+    #     download_artifact(name, url, args.output_dir, args.token)
+    #     # Be gentle to GitHub
+    #     time.sleep(1)
 
     errors = get_all_errors(args.output_dir, job_links=job_links)
 
