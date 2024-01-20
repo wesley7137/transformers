@@ -126,6 +126,7 @@ if __name__ == "__main__":
             download_artifact(name, url, args.output_dir, args.token)
             # Be gentle to GitHub
             time.sleep(1)
+            time.sleep(1)
 
     # extract warnings from artifacts
     selected_warnings = extract_warnings(args.output_dir, args.targets)
