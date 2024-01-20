@@ -214,9 +214,10 @@ def make_github_table_per_model(reduced_by_model):
 
 
 if __name__ == "__main__":
+    print("Starting get_ci_error_statistics.py script...")
     parser = argparse.ArgumentParser()
     # Required parameters
-    parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
+    parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run ID. This should be provided as an input to the workflow run.")
     parser.add_argument(
         "--output_dir",
         type=str,
@@ -246,10 +247,11 @@ if __name__ == "__main__":
     with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="UTF-8") as fp:
         json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 
-    for idx, (name, url) in enumerate(artifacts.items()):
-        download_artifact(name, url, args.output_dir, args.token)
-        # Be gentle to GitHub
-        time.sleep(1)
+    print("Replacing download_artifact loop...")
+for idx, (name, url) in enumerate(artifacts.items()):
+    #     download_artifact(name, url, args.output_dir, args.token)
+    #     # Be gentle to GitHub
+    #     time.sleep(1)
 
     errors = get_all_errors(args.output_dir, job_links=job_links)
 
@@ -275,3 +277,4 @@ if __name__ == "__main__":
         fp.write(s1)
     with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s2)
+print("get_ci_error_statistics.py script completed successfully.")
