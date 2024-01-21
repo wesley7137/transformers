@@ -297,17 +297,18 @@ def retrieve_artifact(name: str):
     return _artifact
 
 
+from typing import Dict
+from utils.artifact import Artifact
+
 def retrieve_available_artifacts():
-    class Artifact:
-        def __init__(self, name: str):
-            self.name = name
-            self.paths = []
+    _available_artifacts: Dict[str, Artifact] = {}
 
-        def __str__(self):
-            return self.name
-
-        def add_path(self, path: str):
-            self.paths.append({"name": self.name, "path": path})
+    directories = filter(os.path.isdir, os.listdir())
+    for directory in directories:
+        artifact_name = directory
+        if artifact_name not in _available_artifacts:
+            _available_artifacts[artifact_name] = Artifact(artifact_name)
+            _available_artifacts[artifact_name].add_path(directory)
 
     _available_artifacts: Dict[str, Artifact] = {}
 
@@ -327,28 +328,7 @@ if __name__ == "__main__":
     available_artifacts = retrieve_available_artifacts()
 
     docs = collections.OrderedDict(
-        [
-            ("*.py", "API Examples"),
-            ("*.md", "MD Examples"),
-        ]
-    )
-
-    # This dict will contain all the information relative to each doc test category:
-    # - failed: list of failed tests
-    # - failures: dict in the format 'test': 'error_message'
-    doc_test_results = {
-        v: {
-            "failed": [],
-            "failures": {},
-        }
-        for v in docs.values()
-    }
-
-    # Link to the GitHub Action job
-    doc_test_results["job_link"] = github_actions_job_links.get("run_doctests")
-
-    artifact_path = available_artifacts["doc_tests_gpu_test_reports"].paths[0]
-    artifact = retrieve_artifact(artifact_path["name"])
+new line(s) to replace
     if "stats" in artifact:
         failed, success, time_spent = handle_test_results(artifact["stats"])
         doc_test_results["failures"] = failed
@@ -371,10 +351,10 @@ if __name__ == "__main__":
                         category = docs[file_regex]
                         doc_test_results[category]["failed"].append(test)
 
-                        failure = all_failures[test] if test in all_failures else "N/A"
+                        failure = all_failures.get(test, "N/A")
                         doc_test_results[category]["failures"][test] = failure
                         break
 
-    message = Message("🤗 Results of the doc tests.", doc_test_results)
+message = Message("🤗 Results of the doc tests.", doc_test_results)
     message.post()
     message.post_reply()
