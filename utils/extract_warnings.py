@@ -6,6 +6,11 @@ import zipfile
 
 from get_ci_error_statistics import download_artifact, get_artifacts_links
 
+from get_ci_error_statistics import download_artifact, get_artifacts_links
+import os
+
+from transformers import logging
+
 from transformers import logging
 
 
@@ -16,6 +21,13 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
     """Extract warnings from a downloaded artifact (in .zip format)"""
     selected_warnings = set()
     buffer = []
+
+    def is_valid_zip_file(artifact_path):
+        try:
+            with zipfile.ZipFile(artifact_path) as z:
+                return True
+        except Exception:
+            return False
 
     def parse_line(fp):
         for line in fp:
