@@ -228,6 +228,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
+    # Add a new line to create the output directory if it doesn't exist.
 
     _job_links = get_job_links(args.workflow_run_id, token=args.token)
     job_links = {}
@@ -249,6 +250,8 @@ if __name__ == "__main__":
 
     for idx, (name, url) in enumerate(artifacts.items()):
         download_artifact(name, url, args.output_dir, args.token)
+        # Add a new line to introduce a delay of 1 second between artifact downloads.
+        time.sleep(1)
         # Be gentle to GitHub
         time.sleep(1)
 
