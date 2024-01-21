@@ -351,7 +351,7 @@ new line(s) to replace
                         category = docs[file_regex]
                         doc_test_results[category]["failed"].append(test)
 
-                        failure = all_failures[test] if test in all_failures else "N/A"
+                        failure = all_failures.get(test, "N/A")
                         doc_test_results[category]["failures"][test] = failure
                         break
 
