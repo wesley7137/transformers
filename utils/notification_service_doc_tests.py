@@ -119,7 +119,7 @@ class Message:
             "text": {
                 "type": "plain_text",
                 "text": (
-                    f"There were {self.n_failures} failures, out of {self.n_tests} tests.\nThe suite ran in"
+                    f"There were {self.n_failures} failures, out of {self.n_tests} tests if self.n_failures > 0 else 'There were no failures, all passed'.\nThe suite ran in"
                     f" {self.time}."
                 ),
                 "emoji": True,
