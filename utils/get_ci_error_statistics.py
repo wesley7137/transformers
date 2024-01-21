@@ -249,6 +249,10 @@ if __name__ == "__main__":
         json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 
     for idx, (name, url) in enumerate(artifacts.items()):
+    with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
+        fp.write(s1)
+    with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
+        fp.write(s2)
         download_artifact(name, url, args.output_dir, args.token)
         # Add a new line to introduce a delay of 1 second between artifact downloads.
         time.sleep(1)
