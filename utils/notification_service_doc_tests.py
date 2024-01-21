@@ -328,28 +328,7 @@ if __name__ == "__main__":
     available_artifacts = retrieve_available_artifacts()
 
     docs = collections.OrderedDict(
-        [
-            ("*.py", "API Examples"),
-            ("*.md", "MD Examples"),
-        ]
-    )
-
-    # This dict will contain all the information relative to each doc test category:
-    # - failed: list of failed tests
-    # - failures: dict in the format 'test': 'error_message'
-    doc_test_results = {
-        v: {
-            "failed": [],
-            "failures": {},
-        }
-        for v in docs.values()
-    }
-
-    # Link to the GitHub Action job
-    doc_test_results["job_link"] = github_actions_job_links.get("run_doctests")
-
-    artifact_path = available_artifacts.get("doc_tests_gpu_test_reports")
-    artifact = retrieve_artifact(artifact_path["name"])
+new line(s) to replace
     if "stats" in artifact:
         failed, success, time_spent = handle_test_results(artifact["stats"])
         doc_test_results["failures"] = failed
