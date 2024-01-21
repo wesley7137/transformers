@@ -297,17 +297,18 @@ def retrieve_artifact(name: str):
     return _artifact
 
 
+from typing import Dict
+from utils.artifact import Artifact
+
 def retrieve_available_artifacts():
-    class Artifact:
-        def __init__(self, name: str):
-            self.name = name
-            self.paths = []
+    _available_artifacts: Dict[str, Artifact] = {}
 
-        def __str__(self):
-            return self.name
-
-        def add_path(self, path: str):
-            self.paths.append({"name": self.name, "path": path})
+    directories = filter(os.path.isdir, os.listdir())
+    for directory in directories:
+        artifact_name = directory
+        if artifact_name not in _available_artifacts:
+            _available_artifacts[artifact_name] = Artifact(artifact_name)
+            _available_artifacts[artifact_name].add_path(directory)
 
     _available_artifacts: Dict[str, Artifact] = {}
 
