@@ -258,11 +258,11 @@ if __name__ == "__main__":
     errors = get_all_errors(args.output_dir, job_links=job_links)
 
     # `e[1]` is the error
-    counter = Counter()
+    counter = Counter([e[1] for e in errors])
     counter.update([e[1] for e in errors])
 
     # print the top 30 most common test errors
-    most_common = counter.most_common(30)
+    most_common = counter.most_common(10)
     for item in most_common:
         print(item)
 
