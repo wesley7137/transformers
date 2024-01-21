@@ -355,6 +355,6 @@ new line(s) to replace
                         doc_test_results[category]["failures"][test] = failure
                         break
 
-    message = Message("🤗 Results of the doc tests.", doc_test_results)
+message = Message("🤗 Results of the doc tests.", doc_test_results)
     message.post()
     message.post_reply()
