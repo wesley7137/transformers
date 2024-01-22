@@ -22,6 +22,10 @@ def get_job_links(workflow_run_id, token=None):
     job_links = {}
 
     try:
+        logger.info('Fetching job links')
+        result = requests.get(url, headers=headers)
+        job_links = result.json()
+        job_links.update({job['name']: job['html_url'] for job in result['jobs']})
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
@@ -214,16 +218,19 @@ def make_github_table_per_model(reduced_by_model):
 
 
 if __name__ == "__main__":
+    import logging
+    logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger()
     parser = argparse.ArgumentParser()
     # Required parameters
-    parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
+    parser.add_argument("--workflow_run_id", type=str, required=True, help="The ID of the GitHub Actions workflow run. You can find this ID in the URL of the GitHub Actions workflow run page.")
     parser.add_argument(
         "--output_dir",
         type=str,
         required=True,
-        help="Where to store the downloaded artifacts and other result files.",
+        help="The directory path where the downloaded artifacts and result files will be stored.",
     )
-    parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
+    parser.add_argument("--token", default=None, type=str, help="A token with the `actions:read` permission. You can create a personal access token with this permission in your GitHub account settings.")
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
