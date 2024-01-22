@@ -29,22 +29,80 @@ client = WebClient(token=os.environ["CI_SLACK_BOT_TOKEN"])
 
 
 def handle_test_results(test_results):
-    expressions = test_results.split(" ")
+    try:
+        expressions = test_results.split(" ")
 
-    failed = 0
-    success = 0
+        failed = 0
+        success = 0
 
-    # When the output is short enough, the output is surrounded by = signs: "== OUTPUT =="
-    # When it is too long, those signs are not present.
-    time_spent = expressions[-2] if "=" in expressions[-1] else expressions[-1]
+        # When the output is short enough, the output is surrounded by = signs: "== OUTPUT =="
+        # When it is too long, those signs are not present.
+        time_spent = expressions[-2] if "=" in expressions[-1] else expressions[-1]
 
-    for i, expression in enumerate(expressions):
-        if "failed" in expression:
-            failed += int(expressions[i - 1])
-        if "passed" in expression:
-            success += int(expressions[i - 1])
+        for i, expression in enumerate(expressions):
+            if "failed" in expression:
+                failed += int(expressions[i - 1])
+            if "passed" in expression:
+                success += int(expressions[i - 1])
 
-    return failed, success, time_spent
+        return failed, success, time_spent
+    except Exception as e:
+        print(f"Error in handle_test_results: {e}")
+        return 0, 0, "N/A"
+
+
+def extract_first_line_failure(failures_short_lines):
+    try:
+        failures = {}
+        file = None
+        in_error = False
+        for line in failures_short_lines.split("\n"):
+            if re.search(r"_ \[doctest\]", line):
+                in_error = True
+                file = line.split(" ")[2]
+            elif in_error and not line.split(" ")[0].isdigit():
+                failures[file] = line
+                in_error = False
+
+        return failures
+    except Exception as e:
+        print(f"Error in extract_first_line_failure: {e}")
+        return {}
+
+
+class Message:
+    def __init__(self, title: str, doc_test_results: Dict):
+        self.title = title
+
+        self._time_spent = doc_test_results["time_spent"].split(",")[0]
+        self.n_success = doc_test_results["success"]
+        self.n_failures = doc_test_results["failures"]
+        self.n_tests = self.n_success + self.n_failures
+
+        # Failures and success of the modeling tests
+        self.doc_test_results = doc_test_results
+
+    @property
+    def time(self) -> str:
+        time_spent = [self._time_spent]
+        total_secs = 0
+
+        for time in time_spent:
+            time_parts = time.split(":")
+
+            # Time can be formatted as xx:xx:xx, as .xx, or as x.xx if the time spent was less than a minute.
+            if len(time_parts) == 1:
+                time_parts = [0, 0, time_parts[0]]
+
+            hours, minutes, seconds = int(time_parts[0]), int(time_parts[1]), float(time_parts[2])
+            total_secs += hours * 3600 + minutes * 60 + seconds
+
+        hours, minutes, seconds = total_secs // 3600, (total_secs % 3600) // 60, total_secs % 60
+        return f"{int(hours)}h{int(minutes)}m{int(seconds)}s"
+
+    @property
+    def header(self) -> Dict:
+        return {"type": "header", "text": {"type": "plain_text", "text": self.title}}
 
 
 def extract_first_line_failure(failures_short_lines):
