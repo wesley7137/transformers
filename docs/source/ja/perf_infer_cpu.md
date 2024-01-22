@@ -20,6 +20,9 @@ rendered properly in your Markdown viewer.
 
 ## `BetterTransformer` for faster inference
 
+## Efficient Inference on CPU
+The `get_github_job_time` function provides a convenient way to extract time information from a single job in a GitHub Actions workflow run, allowing for efficient inference on CPU. By handling potential errors and exceptions during the extraction of time info, this function supports better performance for model inference. To learn more about `get_github_job_time`, refer to the documentation [here](https://github.com/huggingface/transformers/blob/main/utils/get_github_job_time.py).
+
 最近、テキスト、画像、および音声モデルのCPU上での高速な推論のために`BetterTransformer`を統合しました。詳細については、この統合に関するドキュメンテーションを[こちら](https://huggingface.co/docs/optimum/bettertransformer/overview)で確認してください。
 
 ## PyTorch JITモード（TorchScript）
@@ -51,6 +54,14 @@ PyTorch < 1.14.0の場合、jitモードはforwardパラメーターの順序が
 [Transformers質問応答の使用例](https://github.com/huggingface/transformers/tree/main/examples/pytorch/question-answering)を参考にしてください。
 
 - Inference using jit mode on CPU:
+
+### Usage of `get_github_job_time`
+To perform inference using the `get_github_job_time` function in CPU, follow the example below:
+```
+python run_qa.py \
+--model_name_or_path csarron/bert-base-uncased-squad-v1 \
+--dataset_name squad \
+--do_eval \
 <pre>python run_qa.py \
 --model_name_or_path csarron/bert-base-uncased-squad-v1 \
 --dataset_name squad \

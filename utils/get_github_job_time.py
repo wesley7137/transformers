@@ -7,7 +7,7 @@ import requests
 
 
 def extract_time_from_single_job(job):
-    """Extract time info from a single job in a GitHub Actions workflow run"""
+    """Handle potential errors and exceptions during the extraction of time info from a single job"""
 
     job_info = {}
 
@@ -27,7 +27,7 @@ def extract_time_from_single_job(job):
 
 
 def get_job_time(workflow_run_id, token=None):
-    """Extract time info for all jobs in a GitHub Actions workflow run"""
+    """Handle potential errors and exceptions during the extraction of time info for all jobs"""
 
     headers = None
     if token is not None:
