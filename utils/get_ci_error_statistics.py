@@ -76,6 +76,7 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
     download_url = result.headers["Location"]
     response = requests.get(download_url, allow_redirects=True)
+    return response
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
     with open(file_path, "wb") as fp:
         fp.write(response.content)
@@ -216,6 +217,7 @@ def make_github_table_per_model(reduced_by_model):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # Required parameters
+    parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission")
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
     parser.add_argument(
         "--output_dir",
@@ -268,10 +270,19 @@ if __name__ == "__main__":
     reduced_by_error = reduce_by_error(errors)
     reduced_by_model = reduce_by_model(errors)
 
+    reduced_by_error = reduce_by_error(errors)
     s1 = make_github_table(reduced_by_error)
-    s2 = make_github_table_per_model(reduced_by_model)
-
     with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s1)
+    reduced_by_model = reduce_by_model(errors)
+    s2 = make_github_table_per_model(reduced_by_model)
     with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s2)
+
+with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
+    fp.write(s1)
+
+with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
+    fp.write(s2)
+with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
+        json.dump(errors, fp, ensure_ascii=False, indent=4)
