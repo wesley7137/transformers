@@ -216,14 +216,14 @@ def make_github_table_per_model(reduced_by_model):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # Required parameters
-    parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
+    parser.add_argument("--workflow_run_id", type=str, required=True, help='A GitHub Actions workflow run id.')
     parser.add_argument(
         "--output_dir",
         type=str,
         required=True,
         help="Where to store the downloaded artifacts and other result files.",
     )
-    parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
+    parser.add_argument("'parser.add_argument('--token', default=None, type=str, help='A token that has actions:read permission.')'", default=None, type=str, help="A token that has actions:read permission.")
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -250,6 +250,13 @@ if __name__ == "__main__":
         download_artifact(name, url, args.output_dir, args.token)
         # Be gentle to GitHub
         time.sleep(1)
+    # Check if the artifacts and files are available before processing
+    try:
+        assert os.path.exists(os.path.join(args.output_dir, 'artifacts.json')), 'Artifacts file is available'
+        print('Artifacts file is available')
+    except AssertionError as e:
+        raise Exception('Artifacts file is missing') from e
+    assert all([os.path.exists(os.path.join(args.output_dir, p)) for p in os.listdir(args.output_dir) if p.endswith('.zip')]), 'Some artifact files are missing'
 
     errors = get_all_errors(args.output_dir, job_links=job_links)
 
