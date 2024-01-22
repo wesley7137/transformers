@@ -10,6 +10,9 @@ on:
 env:
   HF_HOME: /mnt/cache
   TRANSFORMERS_IS_CI: yes
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
   OMP_NUM_THREADS: 8
   MKL_NUM_THREADS: 8
   PYTEST_TIMEOUT: 60
@@ -31,6 +34,7 @@ jobs:
 
   check_runners:
     name: Check Runners
+    needs: check_runner_status
     needs: check_runner_status
     strategy:
       matrix:
@@ -92,6 +96,12 @@ jobs:
 
       - name: Update clone using environment variables
         working-directory: /transformers
+      - name: Login to Docker registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           echo "original branch = $(git branch --show-current)"
           git fetch && git checkout ${{ env.CI_BRANCH }}
