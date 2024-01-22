@@ -36,13 +36,13 @@ def handle_test_results(test_results):
 
     # When the output is short enough, the output is surrounded by = signs: "== OUTPUT =="
     # When it is too long, those signs are not present.
-    time_spent = expressions[-2] if "=" in expressions[-1] else expressions[-1]
+    time_spent = expressions[-1].strip()
 
     for i, expression in enumerate(expressions):
         if "failed" in expression:
             failed += int(expressions[i - 1])
         if "passed" in expression:
-            success += int(expressions[i - 1])
+            success += int(expressions[i + 1])
 
     return failed, success, time_spent
 
@@ -51,7 +51,7 @@ def extract_first_line_failure(failures_short_lines):
     failures = {}
     file = None
     in_error = False
-    for line in failures_short_lines.split("\n"):
+    for line in failures_short_lines.strip().split("\n"):
         if re.search(r"_ \[doctest\]", line):
             in_error = True
             file = line.split(" ")[2]
@@ -86,7 +86,7 @@ class Message:
             if len(time_parts) == 1:
                 time_parts = [0, 0, time_parts[0]]
 
-            hours, minutes, seconds = int(time_parts[0]), int(time_parts[1]), float(time_parts[2])
+            hours, minutes, seconds = int(time_parts[0]), int(time_parts[1]), round(float(time_parts[2]), 1)
             total_secs += hours * 3600 + minutes * 60 + seconds
 
         hours, minutes, seconds = total_secs // 3600, (total_secs % 3600) // 60, total_secs % 60
@@ -145,7 +145,7 @@ class Message:
                 report += "\n\n"
 
             report += f"*{category} failures*:".ljust(line_length // 2).rjust(line_length // 2) + "\n"
-            report += "`"
+            report += "``"
             report += "`\n`".join(failures)
             report += "`"
 
@@ -255,7 +255,7 @@ class Message:
                     channel=os.environ["CI_SLACK_CHANNEL_ID_DAILY"],
                     text=f"Results for {job}",
                     blocks=blocks,
-                    thread_ts=self.thread_ts["ts"],
+                    thread_ts=self.thread_ts.get('ts'),
                 )
 
                 time.sleep(1)
