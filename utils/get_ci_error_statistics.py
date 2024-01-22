@@ -214,6 +214,9 @@ def make_github_table_per_model(reduced_by_model):
 
 
 if __name__ == "__main__":
+    import logging
+    logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger()
     parser = argparse.ArgumentParser()
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="The ID of the GitHub Actions workflow run. You can find this ID in the URL of the GitHub Actions workflow run page.")
