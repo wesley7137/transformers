@@ -22,6 +22,10 @@ def get_job_links(workflow_run_id, token=None):
     job_links = {}
 
     try:
+        logger.info('Fetching job links')
+        result = requests.get(url, headers=headers)
+        job_links = result.json()
+        job_links.update({job['name']: job['html_url'] for job in result['jobs']})
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
