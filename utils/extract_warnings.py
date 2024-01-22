@@ -67,7 +67,11 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
 def extract_warnings(artifact_dir, targets):
     """Extract warnings from all artifact files"""
 
-    selected_warnings = set()
+    try:
+        selected_warnings = set()
+    except Exception as e:
+        logger.error(f'An error occurred while initializing the selected_warnings set: {e}')
+        return set()
 
     paths = [os.path.join(artifact_dir, p) for p in os.listdir(artifact_dir) if (p.endswith(".zip") or from_gh)]
     for p in paths:
@@ -104,7 +108,11 @@ if __name__ == "__main__":
         help="If running from a GitHub action workflow and collecting warnings from its artifacts.",
     )
 
-    args = parser.parse_args()
+    try:
+        args = parser.parse_args()
+    except argparse.ArgumentError as e:
+        logger.error(f'An error occurred while parsing input arguments: {e}')
+        args = None
 
     from_gh = args.from_gh
     if from_gh:
@@ -119,12 +127,15 @@ if __name__ == "__main__":
             json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 
         # download artifacts
-        for idx, (name, url) in enumerate(artifacts.items()):
-            print(name)
-            print(url)
-            print("=" * 80)
-            download_artifact(name, url, args.output_dir, args.token)
-            # Be gentle to GitHub
+        try:
+            for idx, (name, url) in enumerate(artifacts.items()):
+                print(name)
+                print(url)
+                print("=" * 80)
+                download_artifact(name, url, args.output_dir, args.token)
+                # Be gentle to GitHub
+        except Exception as e:
+            logger.error(f'An error occurred during artifact download: {e}')
             time.sleep(1)
 
     # extract warnings from artifacts
