@@ -1,8 +1,10 @@
-import argparse
+import argparse, requests
 import json
 import os
 import time
 import zipfile
+
+import requests
 
 from get_ci_error_statistics import download_artifact, get_artifacts_links
 
@@ -123,7 +125,7 @@ if __name__ == "__main__":
             print(name)
             print(url)
             print("=" * 80)
-            download_artifact(name, url, args.output_dir, args.token)
+            download_artifact(name, url, os.path.join(args.output_dir, name), args.token)
             # Be gentle to GitHub
             time.sleep(1)
 
