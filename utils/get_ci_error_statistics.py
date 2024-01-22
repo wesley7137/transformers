@@ -277,3 +277,5 @@ if __name__ == "__main__":
         fp.write(s1)
     with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s2)
+with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
+        json.dump(errors, fp, ensure_ascii=False, indent=4)
