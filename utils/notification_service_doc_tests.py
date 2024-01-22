@@ -311,13 +311,14 @@ def retrieve_available_artifacts():
 
     _available_artifacts: Dict[str, Artifact] = {}
 
-    directories = filter(os.path.isdir, os.listdir())
+    directories = [d for d in os.listdir('.') if os.path.isdir(d)]
     for directory in directories:
         artifact_name = directory
+        artifact_paths = [d for d in os.listdir(directory)]
         if artifact_name not in _available_artifacts:
             _available_artifacts[artifact_name] = Artifact(artifact_name)
-
-            _available_artifacts[artifact_name].add_path(directory)
+            for path in artifact_paths:
+                _available_artifacts[artifact_name].add_path(path)
 
     return _available_artifacts
 
