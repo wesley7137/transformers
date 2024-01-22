@@ -25,7 +25,7 @@ def get_job_links(workflow_run_id, token=None):
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
-        for i in range(pages_to_iterate_over):
+        for i in range(pages_to_iterate_over-1):
             result = requests.get(url + f"&page={i + 2}", headers=headers).json()
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
@@ -99,7 +99,7 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
                                 try:
                                     # `error_line` is the place where `error` occurs
                                     error_line = line[: line.index(": ")]
-                                    error = line[line.index(": ") + len(": ") :]
+                                    error = line.split(": ",1)[-1]
                                     errors.append([error_line, error])
                                 except Exception:
                                     # skip un-related lines
