@@ -268,8 +268,8 @@ if __name__ == "__main__":
     reduced_by_error = reduce_by_error(errors)
     reduced_by_model = reduce_by_model(errors)
 
-    s1 = make_github_table(reduced_by_error)
-    s2 = make_github_table_per_model(reduced_by_model)
+    s1 = make_github_table(reduced_by_error) if reduced_by_error else 'Error occurred during error counting.'
+    s2 = make_github_table_per_model(reduced_by_model) if reduced_by_model else 'Error occurred during table generation.'
 
     with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s1)
