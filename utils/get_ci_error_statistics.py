@@ -49,12 +49,16 @@ def get_artifacts_links(worflow_run_id, token=None):
 
     try:
         artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
-        pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
-
-        for i in range(pages_to_iterate_over):
-            result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+        while "next" in result["links"]:
+            url = result["links"]["next"]["url"]
+            result = requests.get(url, headers=headers).json()
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
+        return artifacts
+    except Exception:
+        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+
+    return {}
         return artifacts
     except Exception:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
@@ -79,7 +83,6 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
     with open(file_path, "wb") as fp:
         fp.write(response.content)
-
 
 def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
     """Extract errors from a downloaded artifact (in .zip format)"""
