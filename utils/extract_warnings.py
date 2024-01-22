@@ -81,7 +81,7 @@ if __name__ == "__main__":
     def list_str(values):
         return values.split(",")
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='Handle GitHub Actions artifacts and warnings.', epilog='Note: Make sure to download the required artifacts before running this script.')
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
     parser.add_argument(
