@@ -44,6 +44,11 @@ def handle_test_results(test_results):
         if "passed" in expression:
             success += int(expressions[i - 1])
 
+    try:
+        time_spent = float(time_spent[1:-1])
+    except ValueError:
+        time_spent = 0.0
+
     return failed, success, time_spent
 
 
@@ -204,11 +209,14 @@ class Message:
 
         text = f"{self.n_failures} failures out of {self.n_tests} tests," if self.n_failures else "All tests passed."
 
-        self.thread_ts = client.chat_postMessage(
-            channel=os.environ["CI_SLACK_CHANNEL_ID_DAILY"],
-            blocks=self.payload,
-            text=text,
-        )
+        try:
+            self.thread_ts = client.chat_postMessage(
+                channel=os.environ["CI_SLACK_CHANNEL_ID_DAILY"],
+                blocks=self.payload,
+                text=text,
+            )
+        except Exception as e:
+            print(f"Error posting message: {e}")
 
     def get_reply_blocks(self, job_name, job_link, failures, text):
         failures_text = ""
