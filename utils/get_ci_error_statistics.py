@@ -75,7 +75,7 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
 
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
     download_url = result.headers["Location"]
-    response = requests.get(download_url, allow_redirects=True)
+    response = requests.get(download_url, headers=headers, allow_redirects=True)
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
     with open(file_path, "wb") as fp:
         fp.write(response.content)
@@ -140,7 +140,7 @@ def get_all_errors(artifact_dir, job_links=None):
     return errors
 
 
-def reduce_by_error(logs, error_filter=None):
+def reduce_by_error(logs, error_filter=None,):
     """count each error"""
 
     counter = Counter()
@@ -178,6 +178,9 @@ def reduce_by_model(logs, error_filter=None):
         counter = Counter()
         # count by errors in `test`
         counter.update([x[1] for x in logs if x[2] == test])
+
+        counts = counter.most_common()
+        error_counts = {error: count for error, count in counts if (error_filter is None or error not in error_filter)}
         counts = counter.most_common()
         error_counts = {error: count for error, count in counts if (error_filter is None or error not in error_filter)}
         n_errors = sum(error_counts.values())
@@ -207,7 +210,7 @@ def make_github_table_per_model(reduced_by_model):
     for model in reduced_by_model:
         count = reduced_by_model[model]["count"]
         error, _count = list(reduced_by_model[model]["errors"].items())[0]
-        line = f"| {model} | {count} | {error[:60]} | {_count} |"
+        line = f"| {model} | {count} | error, | {_count} |"
         lines.append(line)
 
     return "\n".join(lines)
