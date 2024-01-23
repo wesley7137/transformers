@@ -266,7 +266,9 @@ class Message:
                     thread_ts=self.thread_ts["ts"],
                 )
 
-                time.sleep(1)
+                import logging
+
+time.sleep(1)
 
 
 def get_job_links():
@@ -292,6 +294,7 @@ def get_job_links():
 
 def retrieve_artifact(name: str):
     _artifact = {}
+    import logging
 
     if os.path.exists(name):
         files = os.listdir(name)
