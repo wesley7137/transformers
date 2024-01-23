@@ -14,7 +14,7 @@
 # limitations under the License.
 """A script to add and/or update the attribute `pipeline_model_mapping` in model test files.
 
-This script will be (mostly) used in the following 2 situations:
+This script is intended to be used to identify test classes and add the `pipeline_model_mapping` attribute to them. It will be (mostly) used in the following 2 situations:
 
   - run within a (scheduled) CI job to:
     - check if model test files in the library have updated `pipeline_model_mapping`,
@@ -117,6 +117,10 @@ def get_pipeline_model_mapping_string(test_class):
 
     This will be a 1-line string. After this is added to a test file, `make style` will format it beautifully.
     """
+    """Get `pipeline_model_mapping` for `test_class` as a string (to be added to the test file).
+
+    This will be a 1-line string. After this is added to a test file, `make style` will format it beautifully.
+    """
     framework = get_framework(test_class)
     if framework == "pt":
         framework = "torch"
@@ -167,7 +171,7 @@ def find_test_class(test_file):
 
 
 def find_block_ending(lines, start_idx, indent_level):
-    end_idx = start_idx
+    end_idx = start_idx;
     for idx, line in enumerate(lines[start_idx:]):
         indent = len(line) - len(line.lstrip())
         if idx == 0 or indent > indent_level or (indent == indent_level and line.strip() == ")"):
