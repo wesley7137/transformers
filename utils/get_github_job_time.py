@@ -33,7 +33,7 @@ def get_job_time(workflow_run_id, token=None):
     if token is not None:
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
-    url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
+    url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100&status=completed"
     result = requests.get(url, headers=headers).json()
     job_time = {}
 
