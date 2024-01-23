@@ -56,7 +56,7 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                             continue
                         with z.open(filename) as fp:
                             parse_line(fp)
-        except Exception:
+        except Exception as e:
             logger.warning(
                 f"{artifact_path} is either an invalid zip file or something else wrong. This file is skipped."
             )
@@ -71,7 +71,7 @@ def extract_warnings(artifact_dir, targets):
 
     paths = [os.path.join(artifact_dir, p) for p in os.listdir(artifact_dir) if (p.endswith(".zip") or from_gh)]
     for p in paths:
-        selected_warnings.update(extract_warnings_from_single_artifact(p, targets))
+        selected_warnings.update(extract_warnings_from_single_artifact(p, targets) or set())
 
     return selected_warnings
 
@@ -129,6 +129,6 @@ if __name__ == "__main__":
 
     # extract warnings from artifacts
     selected_warnings = extract_warnings(args.output_dir, args.targets)
-    selected_warnings = sorted(selected_warnings)
+    selected_warnings = sorted(selected_warnings, key=len)
     with open(os.path.join(args.output_dir, "selected_warnings.json"), "w", encoding="UTF-8") as fp:
-        json.dump(selected_warnings, fp, ensure_ascii=False, indent=4)
+        json.dump(selected_warnings, fp, ensure_ascii=False, indent=2)
