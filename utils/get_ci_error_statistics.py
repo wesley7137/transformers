@@ -15,7 +15,7 @@ def get_job_links(workflow_run_id, token=None):
 
     headers = None
     if token is not None:
-        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
+        headers = {"Accept": "application/vnd.github+json", "Authorization": f"token {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
     result = requests.get(url, headers=headers).json()
@@ -30,8 +30,8 @@ def get_job_links(workflow_run_id, token=None):
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    except requests.exceptions.RequestException:
+        print(f"'An error occurred while fetching links:\n' + str(traceback.format_exc())\n{traceback.format_exc()}")
 
     return {}
 
@@ -71,7 +71,7 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     """
     headers = None
     if token is not None:
-        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
+        headers = {"Accept": "application/vnd.github+json", "Authorization": f"token {token}"}
 
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
     download_url = result.headers["Location"]
