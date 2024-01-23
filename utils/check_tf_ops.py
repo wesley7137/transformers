@@ -41,7 +41,19 @@ INTERNAL_OPS = [
 ]
 
 
-def onnx_compliancy(saved_model_path, strict, opset):
+def onnx_compliancy(saved_model_path: str, opset: int, strict: bool = False) -> None:
+    """
+    Check the compatibility of a saved model with ONNX.
+
+    Args:
+        saved_model_path (str): Path to the saved model file (.pb format).
+        opset (int): The ONNX opset against which the model has to be tested.
+        strict (bool, optional): Whether to make the checking strict (raise errors) or not (raise warnings).
+
+    Returns:
+        None
+    """
+    
     saved_model = SavedModel()
     onnx_ops = []
 
@@ -84,7 +96,7 @@ def onnx_compliancy(saved_model_path, strict, opset):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Check the compatibility of a saved model with ONNX.")
     parser.add_argument("--saved_model_path", help="Path of the saved model to check (the .pb file).")
     parser.add_argument(
         "--opset", default=12, type=int, help="The ONNX opset against which the model has to be tested."
