@@ -189,7 +189,7 @@ def reduce_by_model(logs, error_filter=None):
 
 
 def make_github_table(reduced_by_error):
-    header = "| no. | error | status |"
+    header = "| no. | error | count | status |"
     sep = "|-:|:-|:-|"
     lines = [header, sep]
     for error in reduced_by_error:
