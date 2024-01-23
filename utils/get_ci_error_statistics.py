@@ -18,8 +18,13 @@ def get_job_links(workflow_run_id, token=None):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
-    result = requests.get(url, headers=headers).json()
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        result = response.json()
+    else:
+        print(f"Failed to fetch job links: {response.status_code}")
     job_links = {}
+    rate_limit_remaining = 100
 
     try:
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
@@ -261,6 +266,7 @@ if __name__ == "__main__":
     most_common = counter.most_common(30)
     for item in most_common:
         print(item)
+# Add rate limit handling logic
 
     with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
         json.dump(errors, fp, ensure_ascii=False, indent=4)
