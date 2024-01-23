@@ -20,7 +20,7 @@ To generate the documentation, you first have to build it. Several packages are 
 you can install them with the following command, at the root of the code repository:
 
 ```bash
-pip install -e ".[docs]"
+pip install -e ".[docs]" -r requirements.txt
 ```
 
 Then you need to install our special tool that builds the documentation:
@@ -61,7 +61,7 @@ pip install watchdog
 Then run the following command:
 
 ```bash
-doc-builder preview {package_name} {path_to_docs}
+doc-builder preview transformers docs/source/en/ --port 3000
 ```
 
 For example:
@@ -75,7 +75,7 @@ The docs will be viewable at [http://localhost:3000](http://localhost:3000). You
 ---
 **NOTE**
 
-The `preview` command only works with existing doc files. When you add a completely new file, you need to update `_toctree.yml` & restart `preview` command (`ctrl-c` to stop it & call `doc-builder preview ...` again).
+The `preview` command only works with existing doc files. When you add a completely new file, you need to update `_toctree.yml` and restart the `preview` command (`ctrl-c` to stop it & call `doc-builder preview ...` again).
 
 ---
 
@@ -124,6 +124,51 @@ Adding a new tutorial or section is done in two steps:
 
 - Add a new file under `./source`. This file can either be ReStructuredText (.rst) or Markdown (.md).
 - Link that file in `./source/_toctree.yml` on the correct toc-tree.
+
+Make sure to put your new file under the proper section. It's unlikely to go in the first section (*Get Started*), so
+depending on the intended targets (beginners, more advanced users, or researchers) it should go in sections two, three, or
+four.
+
+### Translating
+
+When translating, refer to the guide at [./TRANSLATING.md](https://github.com/huggingface/transformers/blob/main/docs/TRANSLATING.md).
+
+
+### Adding a new model
+
+When adding a new model:
+
+- Create a file `xxx.md` or under `./source/model_doc` (don't hesitate to copy an existing file as template).
+- Link that file in `./source/_toctree.yml`.
+- Write a short overview of the model:
+    - Overview with paper & authors
+    - Paper abstract
+    - Tips and tricks and how to use it best
+- Add the classes that should be linked in the model. This generally includes the configuration, the tokenizer, and
+  every model of that class (the base model, alongside models with additional heads), both in PyTorch and TensorFlow.
+  The order is generally:
+    - Configuration
+    - Tokenizer
+    - PyTorch base model
+    - PyTorch head models
+    - TensorFlow base model
+    - TensorFlow head models
+    - Flax base model
+    - Flax head models
+
+These classes should be added using our Markdown syntax. Usually as follows:
+
+```
+## XXXConfig
+
+[[autodoc]] XXXConfig
+```
+
+This will include every public method of the configuration that is documented. If for some reason you wish for a method
+not to be displayed in the documentation, you can do so by specifying which methods should be in the docs:
+
+```
+## XXXTokenizer
 
 Make sure to put your new file under the proper section. It's unlikely to go in the first section (*Get Started*), so
 depending on the intended targets (beginners, more advanced users, or researchers) it should go in sections two, three, or
