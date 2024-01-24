@@ -19,7 +19,7 @@ def get_job_links(workflow_run_id, token=None):
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
     result = requests.get(url, headers=headers).json()
-    job_links = {}
+    job_links = get_job_links(workflow_run_id, token)
 
     try:
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
@@ -75,10 +75,13 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
 
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
     download_url = result.headers["Location"]
-    response = requests.get(download_url, allow_redirects=True)
+    response = requests.get(download_url, headers=headers, allow_redirects=True)
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
     with open(file_path, "wb") as fp:
-        fp.write(response.content)
+        if response.status_code != 200:
+        	print(f"Failed to download artifact {artifact_name}")
+        else:
+        	fp.write(response.content)
 
 
 def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
@@ -214,7 +217,7 @@ def make_github_table_per_model(reduced_by_model):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='Extract errors and artifacts from GitHub Actions workflow run.')
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
     parser.add_argument(
@@ -262,14 +265,20 @@ if __name__ == "__main__":
     for item in most_common:
         print(item)
 
-    with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
-        json.dump(errors, fp, ensure_ascii=False, indent=4)
+    try:
+        with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
+            json.dump(errors, fp, ensure_ascii=False, indent=4)
+    except Exception as e:
+        print(f"Failed to write errors to file: {e}")
 
-    reduced_by_error = reduce_by_error(errors)
-    reduced_by_model = reduce_by_model(errors)
+    try:
+        reduced_by_error = reduce_by_error(errors)
+        reduced_by_model = reduce_by_model(errors)
 
-    s1 = make_github_table(reduced_by_error)
-    s2 = make_github_table_per_model(reduced_by_model)
+        s1 = make_github_table(reduced_by_error)
+        s2 = make_github_table_per_model(reduced_by_model)
+    except Exception as e:
+        print(f"Error generating output files: {e}")
 
     with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s1)
