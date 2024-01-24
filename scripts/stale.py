@@ -49,7 +49,7 @@ def main():
         ):
             # print(f"Would close issue {issue.number} since it has been 7 days of inactivity since bot mention.")
             try:
-                issue.edit(state="closed")
+                issue.edit(state="closed", comment="Issue closed due to inactivity")
             except github.GithubException as e:
                 print("Couldn't close the issue:", repr(e))
         elif (
