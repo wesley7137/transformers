@@ -14,7 +14,8 @@ logger = logging.get_logger(__name__)
 
 def extract_warnings_from_single_artifact(artifact_path, targets):
     """Extract warnings from a downloaded artifact (in .zip format)"""
-    selected_warnings = set()
+    if 'workflow_call' in artifact_path:
+        selected_warnings = set()
     buffer = []
 
     def parse_line(fp):
