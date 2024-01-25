@@ -1,5 +1,9 @@
 import argparse
 import json
+import logging
+import sys
+import pathlib
+import os
 import math
 import os
 import time
@@ -17,13 +21,26 @@ import requests
 def get_job_links(workflow_run_id, token=None):
     """Extract job names and their job links in a GitHub Actions workflow run"""
 
-    headers = None
-    if token is not None:
-        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
+    try:
+        headers = None
+        if token is not None:
+            headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
-    url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
-    result = requests.get(url, headers=headers).json()
-    job_links = {}
+        url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
+        result = requests.get(url, headers=headers).json()
+        job_links = {}
+        job_links.update({job['name']: job['html_url'] for job in result['jobs']})
+        pages_to_iterate_over = math.ceil((result['total_count'] - 100) / 100)
+
+        for i in range(pages_to_iterate_over):
+            result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+            job_links.update({job['name']: job['html_url'] for job in result['jobs']})
+
+        return job_links
+    except Exception as e:
+        logging.error(f'An error occurred: {e}', exc_info=True)
+        sys.exit(1)
+        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     try:
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
@@ -304,8 +321,5 @@ if __name__ == "__main__":
 
     s1 = make_github_table(reduced_by_error)
     s2 = make_github_table_per_model(reduced_by_model)
-
-    with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
-        fp.write(s1)
-    with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
-        fp.write(s2)
+    logging.info(s1)
+    logging.info(s2)
