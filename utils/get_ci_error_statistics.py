@@ -5,7 +5,11 @@ import os
 import time
 import traceback
 import zipfile
+import logging
+import sys
+import pathlib
 from collections import Counter
+import re
 
 import requests
 
@@ -30,7 +34,9 @@ def get_job_links(workflow_run_id, token=None):
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
+    except Exception as e:
+        logging.error(f'An error occurred: {e}', exc_info=True)
+        sys.exit(1)
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
@@ -53,7 +59,9 @@ def get_job_links(workflow_run_id, token=None):
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
+    except Exception as e:
+        logging.error(f'An error occurred: {e}', exc_info=True)
+        sys.exit(1)
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
@@ -79,7 +87,9 @@ def get_artifacts_links(worflow_run_id, token=None):
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
         return artifacts
-    except Exception:
+    except Exception as e:
+        logging.error(f'An error occurred: {e}', exc_info=True)
+        sys.exit(1)
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
@@ -110,10 +120,11 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
     failed_tests = []
     job_name = None
 
-    with zipfile.ZipFile(artifact_zip_path) as z:
+    try:
+        with zipfile.ZipFile(artifact_zip_path) as z:
         for filename in z.namelist():
             if not os.path.isdir(filename):
-                # read the file
+                # Read the file
                 if filename in ["failures_line.txt", "summary_short.txt", "job_name.txt"]:
                     with z.open(filename) as f:
                         for line in f:
