@@ -207,7 +207,7 @@ def make_github_table_per_model(reduced_by_model):
     for model in reduced_by_model:
         count = reduced_by_model[model]["count"]
         error, _count = list(reduced_by_model[model]["errors"].items())[0]
-        line = f"| {model} | {count} | {error[:60]} | {_count} |"
+        line = f"| {model} | {count} | {max(reduced_by_model[model]['errors'], key=reduced_by_model[model]['errors'].get)[:60]} | {_count} |"
         lines.append(line)
 
     return "\n".join(lines)
