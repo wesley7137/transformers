@@ -1,6 +1,7 @@
 import argparse
 import json
 import logging
+import requests.exceptions
 import traceback
 import time
 import sys
@@ -17,6 +18,8 @@ import pathlib
 from collections import Counter
 import re
 import unittest
+import time
+import requests.exceptions
 import requests
 import requests.exceptions
 
@@ -34,7 +37,12 @@ def get_job_links(workflow_run_id, token=None):
 
         url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
         result = requests.get(url, headers=headers)
+        try:
         result.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        logging.error(f'HTTP error occurred: {e}', exc_info=True)
+    if 'jobs' not in result: 
+        raise Exception('No jobs found in the workflow run')
         result = result.json()
         logging.info(f'Successfully retrieved data from {url}')
         job_links = {}
@@ -155,6 +163,7 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
         with zipfile.ZipFile(artifact_zip_path) as z:
         for filename in z.namelist():
     if not os.path.isdir(filename):
+            try:
             if not os.path.isdir(filename):
                 # Read the file
                 if filename in ["failures_line.txt", "summary_short.txt", "job_name.txt"]:
@@ -215,6 +224,7 @@ def reduce_by_error(logs, error_filter=None):
     r = {}
     for error, count in counts:
         if error_filter is None or error not in error_filter:
+        try:
             r[error] = {"count": count, "failed_tests": [(x[2], x[0]) for x in logs if x[1] == error]}
 
     r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
