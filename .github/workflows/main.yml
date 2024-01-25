@@ -7,7 +7,7 @@ def update_workflow_config(file_path):
         content = add_trigger_events(content)
         yaml.dump(content, file)
 
-def add_environment_variables(content):
+def add_error_handling(content):
     # Add the necessary environment variables here
     content["jobs"]["build"]["env"] = {
         "ENV_VAR_1": "value1",
@@ -28,5 +28,4 @@ def add_trigger_events(content):
     return content
 
 # Update the workflow configuration file
-workflow_file_path = ".github/workflows/main.yml"
-update_workflow_config(workflow_file_path)
+# Removed call to update_workflow_config function
