@@ -28,7 +28,7 @@ from typing import Dict, List, Optional, Union
 import requests
 from get_ci_error_statistics import get_job_links
 from get_previous_daily_ci import get_last_daily_ci_reports
-import slack_sdk
+import slack_sdk as slack_sdk_inst
 from slack_sdk import WebClient
 from slack_sdk import WebClient
 
