@@ -16,6 +16,9 @@ import sys
 import pathlib
 from collections import Counter
 import re
+import unittest
+import requests
+import requests.exceptions
 
 import requests
 import requests.exceptions
@@ -30,7 +33,10 @@ def get_job_links(workflow_run_id, token=None):
             headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
         url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
-        result = requests.get(url, headers=headers).json()
+        result = requests.get(url, headers=headers)
+        result.raise_for_status()
+        result = result.json()
+        logging.info(f'Successfully retrieved data from {url}')
         job_links = {}
         job_links.update({job['name']: job['html_url'] for job in result['jobs']})
         pages_to_iterate_over = math.ceil((result['total_count'] - 100) / 100)
