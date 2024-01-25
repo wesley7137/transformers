@@ -19,6 +19,8 @@ import json
 import operator
 import os
 import re
+import requests
+import os
 import sys
 import time
 from typing import Dict, List, Optional, Union
@@ -26,6 +28,8 @@ from typing import Dict, List, Optional, Union
 import requests
 from get_ci_error_statistics import get_job_links
 from get_previous_daily_ci import get_last_daily_ci_reports
+import slack_sdk
+from slack_sdk import WebClient
 from slack_sdk import WebClient
 
 
@@ -576,6 +580,8 @@ class Message:
         print(json.dumps({"blocks": json.loads(payload)}))
 
         text = f"{self.n_failures} failures out of {self.n_tests} tests," if self.n_failures else "All tests passed."
+
+        client = WebClient(token=os.environ['CI_SLACK_BOT_TOKEN'])
 
         self.thread_ts = client.chat_postMessage(
             channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
