@@ -37,7 +37,8 @@ check how they look before committing for instance). You don't have to commit th
 
 ---
 
-## Building the documentation
+  doc-builder build transformers docs/source/en/ --build_dir ~/tmp/test-build
+```
 
 Once you have setup the `doc-builder` and additional packages, you can generate the documentation by 
 typing the following command:
@@ -254,7 +255,11 @@ however write as many lines as you want in the indented description (see the exa
 
 #### Writing a multi-line code block
 
-Multi-line code blocks can be useful for displaying examples. They are done between two lines of three backticks as usual in Markdown:
+### Writing and Testing Documentation Examples Using doctests
+
+Here are a few tips to help you write and test your documentation examples using doctests:
+
+- The outputs of the code need to match the expected output **exactly**, so make sure you have the same outputs. In particular doctest will see a difference between single quotes and double quotes, or a missing parenthesis. The only exceptions to that rule are:
 
 
 ````
@@ -357,7 +362,15 @@ Often, readers will try out the example before even going through the function
 or class definitions. Therefore, it is of utmost importance that the example 
 works as expected.
 
-## Docstring testing
+## Running Documentation Tests Using pytest
+
+For Python files
+
+Run all the tests in the docstrings of a given file with the following command, here is how we test the modeling file of Wav2Vec2 for instance:
+
+```bash
+pytest --doctest-modules src/transformers/models/wav2vec2/modeling_wav2vec2.py -sv --doctest-continue-on-failure
+```
 
 To do so each example should be included in the doctests. 
 We use pytests' [doctest integration](https://docs.pytest.org/doctest.html) to verify that all of our examples run correctly. 
@@ -386,9 +399,35 @@ You can test locally a given file with this command (here testing the quicktour)
 pytest --doctest-modules docs/source/quicktour.md -sv --doctest-continue-on-failure --doctest-glob="*.md"
 ```
 
-### Writing doctests
+## Writing and Testing Documentation Examples Using doctests
 
-Here are a few tips to help you debug the doctests and make them pass:
+### For Markdown files
+
+You can test locally a given file with this command (here testing the quicktour):
+
+```bash
+pytest --doctest-modules docs/source/quicktour.md -sv --doctest-continue-on-failure --doctest-glob="*.md"
+```
+
+### For Markdown files
+
+You can test locally a given file with this command (here testing the quicktour):
+
+```bash
+pytest --doctest-modules docs/source/quicktour.md -sv --doctest-continue-on-failure --doctest-glob="*.md"
+```
+
+## Writing and Testing Documentation Examples Using doctests
+
+### For Markdown files
+
+You can test locally a given file with this command (here testing the quicktour):
+
+```bash
+pytest --doctest-modules docs/source/quicktour.md -sv --doctest-continue-on-failure --doctest-glob="*.md"
+```
+
+Here are a few tips to help you write and test your documentation examples using doctests:
 
 - The outputs of the code need to match the expected output **exactly**, so make sure you have the same outputs. In particular doctest will see a difference between single quotes and double quotes, or a missing parenthesis. The only exceptions to that rule are:
   * whitespace: one give whitespace (space, tabulation, new line) is equivalent to any number of whitespace, so you can add new lines where there are spaces to make your output more readable.
