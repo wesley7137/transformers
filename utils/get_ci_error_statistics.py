@@ -195,7 +195,7 @@ def make_github_table(reduced_by_error):
     for error in reduced_by_error:
         count = reduced_by_error[error]["count"]
         line = f"| {count} | {error[:100]} |  |"
-        lines.append(line)
+        lines.append(line[:100])  # Limit the length of the error message to 100 characters
 
     return "\n".join(lines)
 
@@ -250,7 +250,10 @@ if __name__ == "__main__":
         download_artifact(name, url, args.output_dir, args.token)
         # Be gentle to GitHub
         time.sleep(1)
-
+    # Print the top 30 most common test errors
+    most_common = counter.most_common(30)
+    for item in most_common:
+        print(item)
     errors = get_all_errors(args.output_dir, job_links=job_links)
 
     # `e[1]` is the error
