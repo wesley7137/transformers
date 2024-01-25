@@ -585,7 +585,7 @@ class Message:
 
         self.thread_ts = client.chat_postMessage(
             channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
-            blocks=payload,
+            blocks=json.loads(payload),
             text=text,
         )
 
