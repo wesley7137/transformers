@@ -1,25 +1,64 @@
 import argparse
 import json
+import logging, sys
+import requests.exceptions
+import logging
+import traceback
+import time
+import sys
+import pathlib
+import os, traceback
 import math
 import os
 import time
 import traceback
 import zipfile
+import logging
+import sys
+import pathlib
 from collections import Counter
+import re
+import unittest
+import time
+import requests.exceptions
+import requests
+import requests.exceptions
 
 import requests
+import requests.exceptions
 
 
 def get_job_links(workflow_run_id, token=None):
     """Extract job names and their job links in a GitHub Actions workflow run"""
 
-    headers = None
-    if token is not None:
-        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
+    try:
+        headers = None
+        if token is not None:
+            headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
-    url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
-    result = requests.get(url, headers=headers).json()
-    job_links = {}
+        url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
+        result = requests.get(url, headers=headers)
+        try:
+        result.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        logging.error(f'HTTP error occurred: {e}', exc_info=True)
+    if 'jobs' not in result: 
+        raise Exception('No jobs found in the workflow run')
+        result = result.json()
+        logging.info(f'Successfully retrieved data from {url}')
+        job_links = {}
+        job_links.update({job['name']: job['html_url'] for job in result['jobs']})
+        pages_to_iterate_over = math.ceil((result['total_count'] - 100) / 100)
+
+        for i in range(pages_to_iterate_over):
+            result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+            job_links.update({job['name']: job['html_url'] for job in result['jobs']})
+
+        return job_links
+    except Exception as e:
+        logging.error(f'An error occurred: {e}', exc_info=True)
+        sys.exit(1)
+        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     try:
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
@@ -30,13 +69,40 @@ def get_job_links(workflow_run_id, token=None):
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
+    except Exception as e:
+        logging.error(f'An error occurred: {e}', exc_info=True)
+        sys.exit(1)
+        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+
+    return {}
+    """Get all artifact links from a workflow run"""
+    
+    headers = None
+    if token is not None:
+        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
+    
+    url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/artifacts?per_page=100"
+    result = requests.get(url, headers=headers).json()
+    artifacts = {}
+    
+    try:
+        job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
+        pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
+
+        for i in range(pages_to_iterate_over):
+            result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+            job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
+
+        return job_links
+    except Exception as e:
+        logging.error(f'An error occurred: {e}', exc_info=True)
+        sys.exit(1)
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
 
 
-def get_artifacts_links(worflow_run_id, token=None):
+def get_artifacts_links(workflow_run_id, token=None):
     """Get all artifact links from a workflow run"""
 
     headers = None
@@ -56,7 +122,9 @@ def get_artifacts_links(worflow_run_id, token=None):
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
         return artifacts
-    except Exception:
+    except Exception as e:
+        logging.error(f'An error occurred: {e}', exc_info=True)
+        sys.exit(1)
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
@@ -73,9 +141,13 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     if token is not None:
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
+    try:
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
     download_url = result.headers["Location"]
     response = requests.get(download_url, allow_redirects=True)
+except requests.exceptions.RequestException as e:
+    logging.error(f'An error occurred while downloading artifact: {e}', exc_info=True)
+    sys.exit(1)
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
     with open(file_path, "wb") as fp:
         fp.write(response.content)
@@ -87,10 +159,14 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
     failed_tests = []
     job_name = None
 
+    try:
     with zipfile.ZipFile(artifact_zip_path) as z:
+        with zipfile.ZipFile(artifact_zip_path) as z:
         for filename in z.namelist():
+    if not os.path.isdir(filename):
+            try:
             if not os.path.isdir(filename):
-                # read the file
+                # Read the file
                 if filename in ["failures_line.txt", "summary_short.txt", "job_name.txt"]:
                     with z.open(filename) as f:
                         for line in f:
@@ -149,6 +225,7 @@ def reduce_by_error(logs, error_filter=None):
     r = {}
     for error, count in counts:
         if error_filter is None or error not in error_filter:
+        try:
             r[error] = {"count": count, "failed_tests": [(x[2], x[0]) for x in logs if x[1] == error]}
 
     r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
@@ -215,6 +292,7 @@ def make_github_table_per_model(reduced_by_model):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+import logging
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
     parser.add_argument(
@@ -260,7 +338,7 @@ if __name__ == "__main__":
     # print the top 30 most common test errors
     most_common = counter.most_common(30)
     for item in most_common:
-        print(item)
+        logging.info(item)
 
     with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
         json.dump(errors, fp, ensure_ascii=False, indent=4)
@@ -270,8 +348,5 @@ if __name__ == "__main__":
 
     s1 = make_github_table(reduced_by_error)
     s2 = make_github_table_per_model(reduced_by_model)
-
-    with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
-        fp.write(s1)
-    with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
-        fp.write(s2)
+    logging.info(s1)
+    logging.info(s2)
