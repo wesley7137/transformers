@@ -7,6 +7,7 @@ import zipfile
 from get_ci_error_statistics import download_artifact, get_artifacts_links
 
 from transformers import logging
+import requests
 
 
 logger = logging.get_logger(__name__)
@@ -125,7 +126,10 @@ if __name__ == "__main__":
             print("=" * 80)
             download_artifact(name, url, args.output_dir, args.token)
             # Be gentle to GitHub
-            time.sleep(1)
+            try:
+                time.sleep(1)
+            except Exception as e:
+                logger.warning(f'Error during artifact download: {e}')
 
     # extract warnings from artifacts
     selected_warnings = extract_warnings(args.output_dir, args.targets)
