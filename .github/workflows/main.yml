@@ -1,0 +1,31 @@
+import yaml
+
+def update_workflow_config(file_path):
+    with open(file_path, "w") as file:
+        content = yaml.safe_load(file)
+        content = add_environment_variables(content)
+        content = add_trigger_events(content)
+        yaml.dump(content, file)
+
+def add_error_handling(content):
+    # Add the necessary environment variables here
+    content["jobs"]["build"]["env"] = {
+        "ENV_VAR_1": "value1",
+        "ENV_VAR_2": "value2",
+    }
+    return content
+
+def add_trigger_events(content):
+    # Add the desired trigger events here
+    content["jobs"]["build"]["on"] = {
+        "push": {
+            "branches": ["main"],
+        },
+        "pull_request": {
+            "branches": ["main"],
+        },
+    }
+    return content
+
+# Update the workflow configuration file
+# Removed call to update_workflow_config function
