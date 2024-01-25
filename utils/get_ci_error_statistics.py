@@ -257,7 +257,15 @@ if __name__ == "__main__":
     counter = Counter()
     counter.update([e[1] for e in errors])
 
-    # print the top 30 most common test errors
+    reduced_by_error = reduce_by_error(errors)
+    reduced_by_model = reduce_by_model(errors)
+    reduced_by_error_table = make_github_table(reduced_by_error)
+    with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
+        fp.write(reduced_by_error_table)
+    
+    reduced_by_model_table = make_github_table_per_model(reduced_by_model)
+    with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
+        fp.write(reduced_by_model_table)
     most_common = counter.most_common(30)
     for item in most_common:
         print(item)
