@@ -6,7 +6,7 @@ import time
 import traceback
 import zipfile
 from collections import Counter
-
+from collections import Counter
 import requests
 
 
@@ -194,7 +194,7 @@ def make_github_table(reduced_by_error):
     lines = [header, sep]
     for error in reduced_by_error:
         count = reduced_by_error[error]["count"]
-        line = f"| {count} | {error[:100]} |  |"
+        line = f"| {count} | {error[:100]} |  Missing |"
         lines.append(line)
 
     return "\n".join(lines)
@@ -228,17 +228,24 @@ if __name__ == "__main__":
 
     os.makedirs(args.output_dir, exist_ok=True)
 
-    _job_links = get_job_links(args.workflow_run_id, token=args.token)
-    job_links = {}
+    try:
+        _job_links = get_job_links(args.workflow_run_id, token=args.token)
+        job_links = {}
+    except Exception as e:
+        print(f'Failed to get job links: {str(e)}')
+        job_links = {}
     # To deal with `workflow_call` event, where a job name is the combination of the job names in the caller and callee.
     # For example, `PyTorch 1.11 / Model tests (models/albert, single-gpu)`.
     if _job_links:
-        for k, v in _job_links.items():
-            # This is how GitHub actions combine job names.
-            if " / " in k:
-                index = k.find(" / ")
-                k = k[index + len(" / ") :]
-            job_links[k] = v
+        try:
+            for k, v in _job_links.items():
+                # This is how GitHub actions combine job names.
+                if " / " in k:
+                    index = k.find(" / ")
+                    k = k[index + len(" / ") :]
+                job_links[k] = v
+        except Exception as e:
+            print(f'Failed to process job links: {str(e)}')
     with open(os.path.join(args.output_dir, "job_links.json"), "w", encoding="UTF-8") as fp:
         json.dump(job_links, fp, ensure_ascii=False, indent=4)
 
@@ -247,20 +254,26 @@ if __name__ == "__main__":
         json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 
     for idx, (name, url) in enumerate(artifacts.items()):
-        download_artifact(name, url, args.output_dir, args.token)
-        # Be gentle to GitHub
-        time.sleep(1)
+        try:
+            download_artifact(name, url, args.output_dir, args.token)
+            # Be gentle to GitHub
+            time.sleep(1)
+        except Exception as e:
+            print(f'Failed to download artifact {name}: {str(e)}')
 
-    errors = get_all_errors(args.output_dir, job_links=job_links)
+    try:
+        errors = get_all_errors(args.output_dir, job_links=job_links)
 
-    # `e[1]` is the error
-    counter = Counter()
-    counter.update([e[1] for e in errors])
+        # `e[1]` is the error
+        counter = Counter()
+        counter.update([e[1] for e in errors])
 
-    # print the top 30 most common test errors
-    most_common = counter.most_common(30)
-    for item in most_common:
-        print(item)
+        # print the top 30 most common test errors
+        most_common = counter.most_common(30)
+        for item in most_common:
+            print(item)
+    except Exception as e:
+        print(f'Failed to get errors: {str(e)}')
 
     with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
         json.dump(errors, fp, ensure_ascii=False, indent=4)
