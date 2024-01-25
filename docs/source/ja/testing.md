@@ -168,11 +168,13 @@ pytest -k "test and ada" tests/test_optimization.py
 
 ### Run `accelerate` tests
 
-時々、モデルに対して `accelerate` テストを実行する必要があります。たとえば、`OPT` 実行に対してこれらのテストを実行したい場合、コマンドに `-m accelerate_tests` を追加するだけで済みます：
+時々、特定の実行モデルに `accelerate` テストを実行する必要があります。たとえば、`OPT` 実行に対してこれらのテストを実行したい場合、コマンドに `-m accelerate_tests` を追加するだけで済みます：
 
 ```bash
 RUN_SLOW=1 pytest -m accelerate_tests tests/models/opt/test_modeling_opt.py 
-```
+``````bash
+RUN_SLOW=1 pytest -m accelerate_tests tests/models/opt/test_modeling_opt2.py 
+```または、`GET_MODEL=1 pytest -m accelerate_tests tests/models/GET/modeling_GET.py 
 
 ### Run documentation tests 
 
@@ -297,6 +299,9 @@ pip install pytest-flakefinder
 ```bash
 pytest --flake-finder --flake-runs=5 tests/test_failing_test.py
 ```
+```bash
+pytest --flake-finder --flake-runs=5 tests/test_failing_test2.py
+```
 
 <Tip>
 
@@ -402,6 +407,9 @@ pytest --instafail
 ### To GPU or not to GPU
 
 GPU が有効な設定で、CPU のみモードでテストするには、`CUDA_VISIBLE_DEVICES=""`を追加します。
+```bash
+CUDA_VISIBLE_DEVICES="" pytest tests/utils/test_logging.py
+```
 
 ```bash
 CUDA_VISIBLE_DEVICES="" pytest tests/utils/test_logging.py
