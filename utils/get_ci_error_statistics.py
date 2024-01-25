@@ -1,12 +1,13 @@
 import argparse
 import json
-import logging
+import logging, sys
 import requests.exceptions
+import logging
 import traceback
 import time
 import sys
 import pathlib
-import os
+import os, traceback
 import math
 import os
 import time
@@ -291,6 +292,7 @@ def make_github_table_per_model(reduced_by_model):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+import logging
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
     parser.add_argument(
