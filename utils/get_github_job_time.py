@@ -3,10 +3,11 @@ import math
 import traceback
 
 import dateutil.parser as date_parser
+import traceback
 import requests
 
 
-def extract_time_from_single_job(job):
+def extract_time_from_single_job(job) -> dict:
     """Extract time info from a single job in a GitHub Actions workflow run"""
 
     job_info = {}
