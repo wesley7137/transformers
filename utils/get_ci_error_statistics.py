@@ -245,6 +245,9 @@ def make_github_table(reduced_by_error):
 
 def make_github_table_per_model(reduced_by_model):
     header = "| model | no. of errors | major error | count |"
+    """The URL is of the form `https://api.github.com/repos/huggingface/transformers/actions/artifacts/{ARTIFACT_ID}/zip`,
+    but it can't be used to download directly. We need to get a redirect URL first.
+    See https://docs.github.com/en/rest/actions/artifacts#download-an-artifact"""
     sep = "|-:|-:|-:|-:|"
     lines = [header, sep]
     for model in reduced_by_model:
