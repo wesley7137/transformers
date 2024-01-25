@@ -26,7 +26,7 @@ from utils.fetch_github_actions import extract_time_from_single_job, get_job_lin
 
 
 def get_job_time(workflow_run_id, token=None):
-    """Extract time info for all jobs in a GitHub Actions workflow run"""
+    """Extract time info for all jobs in a GitHub Actions workflow run and iterate through paginated job lists"""
 
     headers = None
     if token is not None:
