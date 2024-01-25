@@ -66,7 +66,7 @@ class Message:
     def __init__(self, title: str, doc_test_results: Dict):
         self.title = title
 
-        self._time_spent = doc_test_results["time_spent"].split(",")[0]
+        self._time_spent = doc_test_results.get('time_spent', '')["time_spent"].split(",")[0]
         self.n_success = doc_test_results["success"]
         self.n_failures = doc_test_results["failures"]
         self.n_tests = self.n_success + self.n_failures
