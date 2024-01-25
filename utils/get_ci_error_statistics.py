@@ -10,7 +10,7 @@ from collections import Counter
 import requests
 
 
-def get_job_links(workflow_run_id, token=None):
+def get_job_links(workflow_run_id, token=None, workflow_call_event=False):
     """Extract job names and their job links in a GitHub Actions workflow run"""
 
     headers = None
@@ -36,7 +36,7 @@ def get_job_links(workflow_run_id, token=None):
     return {}
 
 
-def get_artifacts_links(worflow_run_id, token=None):
+def get_artifacts_links(worflow_run_id, token=None, workflow_call_event=False):
     """Get all artifact links from a workflow run"""
 
     headers = None
@@ -62,7 +62,7 @@ def get_artifacts_links(worflow_run_id, token=None):
     return {}
 
 
-def download_artifact(artifact_name, artifact_url, output_dir, token):
+def download_artifact(artifact_name, artifact_url, output_dir, token, workflow_call_event=False):
     """Download a GitHub Action artifact from a URL.
 
     The URL is of the form `https://api.github.com/repos/huggingface/transformers/actions/artifacts/{ARTIFACT_ID}/zip`,
@@ -128,7 +128,7 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
     return result
 
 
-def get_all_errors(artifact_dir, job_links=None):
+def get_all_errors(artifact_dir, job_links=None, workflow_call_event=False):
     """Extract errors from all artifact files"""
 
     errors = []
@@ -140,7 +140,7 @@ def get_all_errors(artifact_dir, job_links=None):
     return errors
 
 
-def reduce_by_error(logs, error_filter=None):
+def reduce_by_error(logs, error_filter=None, workflow_call_event=False):
     """count each error"""
 
     counter = Counter()
@@ -166,7 +166,7 @@ def get_model(test):
     return test
 
 
-def reduce_by_model(logs, error_filter=None):
+def reduce_by_model(logs, error_filter=None, workflow_call_event=False):
     """count each error per model"""
 
     logs = [(x[0], x[1], get_model(x[2])) for x in logs]
