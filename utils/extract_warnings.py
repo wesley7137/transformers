@@ -66,7 +66,6 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
 
 def extract_warnings(artifact_dir, targets):
     """Extract warnings from all artifact files"""
-
     selected_warnings = set()
 
     paths = [os.path.join(artifact_dir, p) for p in os.listdir(artifact_dir) if (p.endswith(".zip") or from_gh)]
