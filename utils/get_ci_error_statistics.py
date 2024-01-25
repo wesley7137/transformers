@@ -255,7 +255,12 @@ if __name__ == "__main__":
 
     # `e[1]` is the error
     counter = Counter()
+    # Add exception handling for potential errors
+try:
+    counter = Counter()
     counter.update([e[1] for e in errors])
+except Exception as e:
+    print(f'Failed to update counter: {e}')
 
     # print the top 30 most common test errors
     most_common = counter.most_common(30)
