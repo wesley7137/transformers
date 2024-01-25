@@ -10,8 +10,29 @@ from collections import Counter
 import requests
 
 
+def download_artifact(artifact_name, artifact_url, output_dir, token):
+    """Download a GitHub Action artifact from a URL.
+
+    The URL is of the form `https://api.github.com/repos/huggingface/transformers/actions/artifacts/{ARTIFACT_ID}/zip`,
+    but it can't be used to download directly. We need to get a redirect URL first.
+    See https://docs.github.com/en/rest/actions/artifacts#download-an-artifact
+    """
+    headers = None
+    if token is not None:
+        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
+
+    result = requests.get(artifact_url, headers=headers, allow_redirects=False)
+    download_url = result.headers["Location"]
+    response = requests.get(download_url, allow_redirects=True)
+    file_path = os.path.join(output_dir, f"{artifact_name}.zip")
+    with open(file_path, "wb") as fp:
+        fp.write(response.content)
+
+import requests
+
+
 def get_job_links(workflow_run_id, token=None):
-    """Extract job names and their job links in a GitHub Actions workflow run"""
+    """Extract job names and their job links and iterate through paginated job lists in a GitHub Actions workflow run"""
 
     headers = None
     if token is not None:
@@ -22,6 +43,9 @@ def get_job_links(workflow_run_id, token=None):
     job_links = {}
 
     try:
+from utils.fetch_github_actions import get_job_links, get_artifacts_links
+from utils.fetch_github_actions import get_job_links, get_artifacts_links
+from utils.fetch_github_actions import get_job_links, get_artifacts_links
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
@@ -34,32 +58,51 @@ def get_job_links(workflow_run_id, token=None):
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
+    job_links = get_job_links(workflow_run_id, token=token)
+    pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
+
+    for i in range(pages_to_iterate_over):
+        result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+        job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
+
+    return job_links
+    job_links = get_job_links(workflow_run_id, token=token)
+    pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
+
+    for i in range(pages_to_iterate_over):
+        result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+        job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
+
+    return job_links
+    job_links = get_job_links(workflow_run_id, token=token)
+    pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
+
+    for i in range(pages_to_iterate_over):
+        result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+        job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
+
+    return job_links
 
 
-def get_artifacts_links(worflow_run_id, token=None):
-    """Get all artifact links from a workflow run"""
+def download_artifact(artifact_name, artifact_url, output_dir, token):
+    """Download a GitHub Action artifact from a URL.
 
+    The URL is of the form `https://api.github.com/repos/huggingface/transformers/actions/artifacts/{ARTIFACT_ID}/zip`,
+    but it can't be used to download directly. We need to get a redirect URL first.
+    See https://docs.github.com/en/rest/actions/artifacts#download-an-artifact
+    """
     headers = None
     if token is not None:
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
-    url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{worflow_run_id}/artifacts?per_page=100"
-    result = requests.get(url, headers=headers).json()
-    artifacts = {}
+    result = requests.get(artifact_url, headers=headers, allow_redirects=False)
+    download_url = result.headers["Location"]
+    response = requests.get(download_url, allow_redirects=True)
+    file_path = os.path.join(output_dir, f"{artifact_name}.zip")
+    with open(file_path, "wb") as fp:
+        fp.write(response.content)
 
-    try:
-        artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
-        pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
-
-        for i in range(pages_to_iterate_over):
-            result = requests.get(url + f"&page={i + 2}", headers=headers).json()
-            artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
-
-        return artifacts
-    except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
-
-    return {}
+    pass
 
 
 def download_artifact(artifact_name, artifact_url, output_dir, token):
@@ -202,6 +245,9 @@ def make_github_table(reduced_by_error):
 
 def make_github_table_per_model(reduced_by_model):
     header = "| model | no. of errors | major error | count |"
+    """The URL is of the form `https://api.github.com/repos/huggingface/transformers/actions/artifacts/{ARTIFACT_ID}/zip`,
+    but it can't be used to download directly. We need to get a redirect URL first.
+    See https://docs.github.com/en/rest/actions/artifacts#download-an-artifact"""
     sep = "|-:|-:|-:|-:|"
     lines = [header, sep]
     for model in reduced_by_model:
@@ -228,7 +274,7 @@ if __name__ == "__main__":
 
     os.makedirs(args.output_dir, exist_ok=True)
 
-    _job_links = get_job_links(args.workflow_run_id, token=args.token)
+    _job_links = fetch_github_actions.get_job_links(args.workflow_run_id, token=args.token)
     job_links = {}
     # To deal with `workflow_call` event, where a job name is the combination of the job names in the caller and callee.
     # For example, `PyTorch 1.11 / Model tests (models/albert, single-gpu)`.
@@ -242,7 +288,7 @@ if __name__ == "__main__":
     with open(os.path.join(args.output_dir, "job_links.json"), "w", encoding="UTF-8") as fp:
         json.dump(job_links, fp, ensure_ascii=False, indent=4)
 
-    artifacts = get_artifacts_links(args.workflow_run_id, token=args.token)
+    artifacts = fetch_github_actions.get_artifacts_links(args.workflow_run_id, token=args.token)
     with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="UTF-8") as fp:
         json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 

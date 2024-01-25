@@ -5,8 +5,7 @@ import traceback
 import dateutil.parser as date_parser
 import requests
 
-
-def extract_time_from_single_job(job):
+from utils.fetch_github_actions import extract_time_from_single_job, get_job_links
     """Extract time info from a single job in a GitHub Actions workflow run"""
 
     job_info = {}
@@ -27,7 +26,7 @@ def extract_time_from_single_job(job):
 
 
 def get_job_time(workflow_run_id, token=None):
-    """Extract time info for all jobs in a GitHub Actions workflow run"""
+    """Extract time info for all jobs in a GitHub Actions workflow run and iterate through paginated job lists"""
 
     headers = None
     if token is not None:
@@ -48,6 +47,7 @@ def get_job_time(workflow_run_id, token=None):
         return job_time
     except Exception:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    return {}
 
     return {}
 
@@ -69,3 +69,27 @@ if __name__ == "__main__":
 
     for k, v in job_time.items():
         print(f'{k}: {v["duration"]}')
+    job_links = get_job_links(workflow_run_id, token=token)
+    pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
+
+    for i in range(pages_to_iterate_over):
+        result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+        job_time.update({job["name"]: extract_time_from_single_job(job) for job in result["jobs"]})
+
+    return job_time
+    job_links = get_job_links(workflow_run_id, token=token)
+    pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
+
+    for i in range(pages_to_iterate_over):
+        result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+        job_time.update({job["name"]: extract_time_from_single_job(job) for job in result["jobs"]})
+
+    return job_time
+    job_links = get_job_links(workflow_run_id, token=token)
+    pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
+
+    for i in range(pages_to_iterate_over):
+        result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+        job_time.update({job["name"]: extract_time_from_single_job(job) for job in result["jobs"]})
+
+    return job_time
