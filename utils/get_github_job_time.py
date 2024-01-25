@@ -6,7 +6,7 @@ import dateutil.parser as date_parser
 import requests
 
 
-def extract_time_from_single_job(job):
+def extract_time_from_single_job(job, workflow_call_event=False):
     """Extract time info from a single job in a GitHub Actions workflow run"""
 
     job_info = {}
@@ -26,7 +26,7 @@ def extract_time_from_single_job(job):
     return job_info
 
 
-def get_job_time(workflow_run_id, token=None):
+def get_job_time(workflow_run_id, token=None, workflow_call_event=False):
     """Extract time info for all jobs in a GitHub Actions workflow run"""
 
     headers = None
