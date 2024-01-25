@@ -4,9 +4,10 @@ import os
 import time
 import zipfile
 
+import sys, traceback
 from get_ci_error_statistics import download_artifact, get_artifacts_links
 
-from transformers import logging
+import logging
 
 
 logger = logging.get_logger(__name__)
@@ -128,7 +129,10 @@ if __name__ == "__main__":
             time.sleep(1)
 
     # extract warnings from artifacts
-    selected_warnings = extract_warnings(args.output_dir, args.targets)
+    try:
+        selected_warnings = extract_warnings(args.output_dir, args.targets)
+    except Exception as e:
+        logging.error(f'Error occurred while extracting warnings: {e}')
     selected_warnings = sorted(selected_warnings)
     with open(os.path.join(args.output_dir, "selected_warnings.json"), "w", encoding="UTF-8") as fp:
         json.dump(selected_warnings, fp, ensure_ascii=False, indent=4)

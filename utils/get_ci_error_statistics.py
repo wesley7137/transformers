@@ -7,6 +7,14 @@ import traceback
 import zipfile
 from collections import Counter
 
+import logging
+import traceback
+import sys
+import logging
+import traceback
+import sys
+import requests_exceptions
+import requests_exceptions
 import requests
 
 
@@ -18,7 +26,11 @@ def get_job_links(workflow_run_id, token=None):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
-    result = requests.get(url, headers=headers).json()
+    try:
+        result = requests.get(url, headers=headers).json()
+    except Exception as e:
+        logging.warning(f'Error occurred while obtaining job links: {e}')
+        result = {}
     job_links = {}
 
     try:
@@ -44,7 +56,11 @@ def get_artifacts_links(worflow_run_id, token=None):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{worflow_run_id}/artifacts?per_page=100"
-    result = requests.get(url, headers=headers).json()
+    try:
+        result = requests.get(url, headers=headers).json()
+    except Exception as e:
+        logging.warning(f'Error occurred while getting artifact links: {e}')
+        result = {}
     artifacts = {}
 
     try:
@@ -268,8 +284,13 @@ if __name__ == "__main__":
     reduced_by_error = reduce_by_error(errors)
     reduced_by_model = reduce_by_model(errors)
 
-    s1 = make_github_table(reduced_by_error)
-    s2 = make_github_table_per_model(reduced_by_model)
+    try:
+        s1 = make_github_table(reduced_by_error)
+        s2 = make_github_table_per_model(reduced_by_model)
+    except Exception as e:
+        logging.error(f'Error occurred while making github tables: {e}')
+        s1 = ''
+        s2 = ''
 
     with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s1)
