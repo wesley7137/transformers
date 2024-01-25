@@ -23,7 +23,7 @@ def extract_time_from_single_job(job):
     job_info["completed_at"] = end
     job_info["duration"] = duration_in_min
 
-    return job_info
+    job_info['from_gh'] = job.get('name', '').startswith('Artifact')
 
 
 def get_job_time(workflow_run_id, token=None):
@@ -32,6 +32,7 @@ def get_job_time(workflow_run_id, token=None):
     headers = None
     if token is not None:
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
+    from_gh = True if 'from_gh' in token else False
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
     result = requests.get(url, headers=headers).json()
