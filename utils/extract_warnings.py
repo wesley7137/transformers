@@ -101,6 +101,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--from_gh",
         action="store_true",
+        default=False,
         help="If running from a GitHub action workflow and collecting warnings from its artifacts.",
     )
 
