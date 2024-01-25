@@ -376,5 +376,11 @@ if __name__ == "__main__":
                         break
 
     message = Message("🤗 Results of the doc tests.", doc_test_results)
+try:
     message.post()
+except Exception as e:
+    print(f'Error in message.post(): {e}')
+try:
     message.post_reply()
+except Exception as e:
+    print(f'Error in message.post_reply(): {e}')
