@@ -36,6 +36,9 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
             else:
                 line = line.strip()
                 buffer.append(line)
+                if len(buffer) > 100:
+                    logger.warning("Warning buffer exceeded maximum length. Skipping the rest of the artifact.")
+                    break
 
     if from_gh:
         for filename in os.listdir(artifact_path):
@@ -80,6 +83,9 @@ if __name__ == "__main__":
 
     def list_str(values):
         return values.split(",")
+                if len(buffer) > 100:
+                    logger.warning("Warning buffer exceeded maximum length. Skipping the rest of the artifact.")
+                    break
 
     parser = argparse.ArgumentParser()
     # Required parameters
