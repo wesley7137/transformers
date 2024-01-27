@@ -82,6 +82,32 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
 
 
 def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
+    try:
+        errors = []
+        failed_tests = []
+        job_name = None
+        with zipfile.ZipFile(artifact_zip_path) as z:
+            for filename in z.namelist():
+                if not os.path.isdir(filename):
+                    if filename in ["failures_line.txt", "summary_short.txt", "job_name.txt"]:
+                        with z.open(filename) as f:
+                            for line in f:
+                                line = line.decode("UTF-8").strip()
+                                if filename == "failures_line.txt":
+                                    try:
+                                        error_line = line[: line.index(": ")]
+                                        error = line[line.index(": ") + len(": ") :]
+                                        errors.append([error_line, error])
+                                    except Exception:
+                                        pass
+                                elif filename == "summary_short.txt" and line.startswith("FAILED "):
+                                    test = line[len("FAILED") :]
+                                    failed_tests.append(test)
+                                elif filename == "job_name.txt":
+                                    job_name = line
+    except Exception as e:
+        print(f"Error processing artifact {artifact_zip_path}: {e}")
+        print(traceback.format_exc())
     """Extract errors from a downloaded artifact (in .zip format)"""
     errors = []
     failed_tests = []
@@ -129,6 +155,18 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
 
 
 def get_all_errors(artifact_dir, job_links=None):
+    try:
+        errors = []
+        paths = [os.path.join(artifact_dir, p) for p in os.listdir(artifact_dir) if p.endswith(".zip")]
+        for p in paths:
+            try:
+                errors.extend(get_errors_from_single_artifact(p, job_links=job_links))
+            except Exception as e:
+                print(f"Error getting errors from artifact {p}: {e}")
+                print(traceback.format_exc())
+    except Exception as e:
+        print(f"Error getting all errors: {e}")
+        print(traceback.format_exc())
     """Extract errors from all artifact files"""
 
     errors = []
@@ -186,6 +224,17 @@ def reduce_by_model(logs, error_filter=None):
 
     r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
     return r
+        counter = Counter()
+        # count by errors in `test`
+        counter.update([x[1] for x in logs if x[2] == test])
+        counts = counter.most_common()
+        error_counts = {error: count for error, count in counts if (error_filter is None or error not in error_filter)}
+        n_errors = sum(error_counts.values())
+        if n_errors > 0:
+            r[test] = {"count": n_errors, "errors": error_counts}
+
+    r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
+    return r
 
 
 def make_github_table(reduced_by_error):
@@ -221,6 +270,9 @@ if __name__ == "__main__":
         "--output_dir",
         type=str,
         required=True,
+    except Exception as e:
+        print(f"Error reducing errors for model {test}: {e}")
+        print(traceback.format_exc())
         help="Where to store the downloaded artifacts and other result files.",
     )
     parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
@@ -247,20 +299,26 @@ if __name__ == "__main__":
         json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 
     for idx, (name, url) in enumerate(artifacts.items()):
-        download_artifact(name, url, args.output_dir, args.token)
+        try:
+            download_artifact(name, url, args.output_dir, args.token)
+        except Exception as e:
+            print(f"Error downloading artifact {name}: {e}")
+            print(traceback.format_exc())
         # Be gentle to GitHub
         time.sleep(1)
 
-    errors = get_all_errors(args.output_dir, job_links=job_links)
-
-    # `e[1]` is the error
-    counter = Counter()
-    counter.update([e[1] for e in errors])
-
-    # print the top 30 most common test errors
-    most_common = counter.most_common(30)
-    for item in most_common:
-        print(item)
+    try:
+        errors = get_all_errors(args.output_dir, job_links=job_links)
+        # `e[1]` is the error
+        counter = Counter()
+        counter.update([e[1] for e in errors])
+        # print the top 30 most common test errors
+        most_common = counter.most_common(30)
+        for item in most_common:
+            print(item)
+    except Exception as e:
+        print(f"Error getting all errors: {e}")
+        print(traceback.format_exc())
 
     with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
         json.dump(errors, fp, ensure_ascii=False, indent=4)
@@ -271,7 +329,11 @@ if __name__ == "__main__":
     s1 = make_github_table(reduced_by_error)
     s2 = make_github_table_per_model(reduced_by_model)
 
+    with open(os.path.join(args.output_dir, "reduced_by_model_errors.txt"), "w", encoding="UTF-8") as fp:
+        fp.write(s2)
+
     with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s1)
     with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s2)
+    relevant_files = ["utils/get_ci_error_statistics.py"]
