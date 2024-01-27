@@ -8,6 +8,8 @@ import zipfile
 from collections import Counter
 from functools import reduce
 from collections import Counter
+from collections import Counter, defaultdict, abc
+from functools import reduce
 from __future__ import annotations
 import json
 
