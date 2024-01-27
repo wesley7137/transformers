@@ -213,7 +213,7 @@ def make_github_table_per_model(reduced_by_model):
     return "\n".join(lines)
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
@@ -224,7 +224,7 @@ if __name__ == "__main__":
         help="Where to store the downloaded artifacts and other result files.",
     )
     parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
-    args = parser.parse_args()
+    args = parser.parse_args([])
 
     os.makedirs(args.output_dir, exist_ok=True)
 
