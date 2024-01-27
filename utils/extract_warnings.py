@@ -5,6 +5,7 @@ import time
 import zipfile
 
 from get_ci_error_statistics import download_artifact, get_artifacts_links
+import requests
 
 from transformers import logging
 
@@ -108,7 +109,7 @@ if __name__ == "__main__":
 
     from_gh = args.from_gh
     if from_gh:
-        # The artifacts have to be downloaded using `actions/download-artifact@v3`
+        # Download the artifacts using `actions/download-artifact@v3` or extract the warnings from the error logs.
         pass
     else:
         os.makedirs(args.output_dir, exist_ok=True)
