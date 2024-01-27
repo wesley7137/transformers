@@ -6,6 +6,7 @@ import time
 import traceback
 import zipfile
 from collections import Counter
+from __future__ import annotations
 
 import requests
 
@@ -268,8 +269,8 @@ if __name__ == "__main__":
     reduced_by_error = reduce_by_error(errors)
     reduced_by_model = reduce_by_model(errors)
 
-    s1 = make_github_table(reduced_by_error)
-    s2 = make_github_table_per_model(reduced_by_model)
+    s1 = make_github_table(reduced_by_error) # Added call to make_github_table
+    s2 = make_github_table_per_model(reduced_by_model) # Added call to make_github_table_per_model
 
     with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s1)
