@@ -22,6 +22,7 @@ import re
 import sys
 import time
 from typing import Dict, List, Optional, Union
+import os
 
 import requests
 from get_ci_error_statistics import get_job_links
@@ -539,7 +540,7 @@ class Message:
             },
         }
 
-        text = ""
+        text = "🚨 It requires immediate attention! Please review the details to take necessary actions."+ ""
         if len(offline_runners) > 0:
             text = "\n  • " + "\n  • ".join(offline_runners)
             text = f"The following runners are offline:\n{text}\n\n"
@@ -562,7 +563,11 @@ class Message:
         payload = json.dumps(blocks)
 
         print("Sending the following payload")
-        print(json.dumps({"blocks": blocks}))
+        payload = json.dumps(blocks); print("Sending the following payload to slack:", payload);client.chat_postMessage(
+    channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
+    text=text,
+    blocks=payload,
+)
 
         client.chat_postMessage(
             channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
@@ -575,7 +580,7 @@ class Message:
         print("Sending the following payload")
         print(json.dumps({"blocks": json.loads(payload)}))
 
-        text = f"{self.n_failures} failures out of {self.n_tests} tests," if self.n_failures else "All tests passed."
+        text = f"{self.n_failures} failures occurred out of {self.n_tests} tests. Please review the details below:" if self.n_failures else "All tests passed. No further action required."
 
         self.thread_ts = client.chat_postMessage(
             channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
