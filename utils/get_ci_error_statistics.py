@@ -247,20 +247,26 @@ if __name__ == "__main__":
         json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 
     for idx, (name, url) in enumerate(artifacts.items()):
-        download_artifact(name, url, args.output_dir, args.token)
+        try:
+            download_artifact(name, url, args.output_dir, args.token)
+        except Exception as e:
+            print(f"Error downloading artifact {name}: {e}")
+            print(traceback.format_exc())
         # Be gentle to GitHub
         time.sleep(1)
 
-    errors = get_all_errors(args.output_dir, job_links=job_links)
-
-    # `e[1]` is the error
-    counter = Counter()
-    counter.update([e[1] for e in errors])
-
-    # print the top 30 most common test errors
-    most_common = counter.most_common(30)
-    for item in most_common:
-        print(item)
+    try:
+        errors = get_all_errors(args.output_dir, job_links=job_links)
+        # `e[1]` is the error
+        counter = Counter()
+        counter.update([e[1] for e in errors])
+        # print the top 30 most common test errors
+        most_common = counter.most_common(30)
+        for item in most_common:
+            print(item)
+    except Exception as e:
+        print(f"Error getting all errors: {e}")
+        print(traceback.format_exc())
 
     with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
         json.dump(errors, fp, ensure_ascii=False, indent=4)
