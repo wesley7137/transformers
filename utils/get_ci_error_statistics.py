@@ -155,6 +155,18 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
 
 
 def get_all_errors(artifact_dir, job_links=None):
+    try:
+        errors = []
+        paths = [os.path.join(artifact_dir, p) for p in os.listdir(artifact_dir) if p.endswith(".zip")]
+        for p in paths:
+            try:
+                errors.extend(get_errors_from_single_artifact(p, job_links=job_links))
+            except Exception as e:
+                print(f"Error getting errors from artifact {p}: {e}")
+                print(traceback.format_exc())
+    except Exception as e:
+        print(f"Error getting all errors: {e}")
+        print(traceback.format_exc())
     """Extract errors from all artifact files"""
 
     errors = []
@@ -303,7 +315,11 @@ if __name__ == "__main__":
     s1 = make_github_table(reduced_by_error)
     s2 = make_github_table_per_model(reduced_by_model)
 
+    with open(os.path.join(args.output_dir, "reduced_by_model_errors.txt"), "w", encoding="UTF-8") as fp:
+        fp.write(s2)
+
     with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s1)
     with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s2)
+    relevant_files = ["utils/get_ci_error_statistics.py"]
