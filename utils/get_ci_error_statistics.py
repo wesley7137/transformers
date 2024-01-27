@@ -247,7 +247,13 @@ if __name__ == "__main__":
         json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 
     for idx, (name, url) in enumerate(artifacts.items()):
-        download_artifact(name, url, args.output_dir, args.token)
+        try:
+            download_artifact(name, url, args.output_dir, args.token)
+            # Be gentle to GitHub
+            time.sleep(1)
+        except Exception as e:
+            print(f'Error downloading artifact: {e}')
+            continue
         # Be gentle to GitHub
         time.sleep(1)
 
