@@ -187,9 +187,12 @@ def reduce_by_model(logs, error_filter=None):
     r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
     return r
 
+    r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
+    return r
+
 
 def make_github_table(reduced_by_error):
-    header = "| no. | error | status |"
+    header = "| no. | error | status |\n"
     sep = "|-:|:-|:-|"
     lines = [header, sep]
     for error in reduced_by_error:
@@ -201,7 +204,7 @@ def make_github_table(reduced_by_error):
 
 
 def make_github_table_per_model(reduced_by_model):
-    header = "| model | no. of errors | major error | count |"
+    header = "| model | no. of errors | major error | count |\n"
     sep = "|-:|-:|-:|-:|"
     lines = [header, sep]
     for model in reduced_by_model:
@@ -228,6 +231,7 @@ if __name__ == "__main__":
 
     os.makedirs(args.output_dir, exist_ok=True)
 
+    # Get job links
     _job_links = get_job_links(args.workflow_run_id, token=args.token)
     job_links = {}
     # To deal with `workflow_call` event, where a job name is the combination of the job names in the caller and callee.
