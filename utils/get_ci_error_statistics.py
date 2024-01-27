@@ -7,6 +7,7 @@ import traceback
 import zipfile
 from collections import Counter
 
+from error_handling import handle_error, log_error
 import requests
 
 
