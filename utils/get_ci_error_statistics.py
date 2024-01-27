@@ -2,12 +2,14 @@ import argparse
 import json
 import math
 import os
+import logging
 import time
 import traceback
 import zipfile
 from collections import Counter
 
 import requests
+import sys
 
 
 def get_job_links(workflow_run_id, token=None):
@@ -226,10 +228,16 @@ if __name__ == "__main__":
     parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
     args = parser.parse_args()
 
-    os.makedirs(args.output_dir, exist_ok=True)
+    try:
+        os.makedirs(args.output_dir, exist_ok=True)
+    except Exception as e:
+        logging.error(f'Error occurred while creating output directory: {args.output_dir}. Error: {e}')
 
-    _job_links = get_job_links(args.workflow_run_id, token=args.token)
-    job_links = {}
+    try:
+        _job_links = get_job_links(args.workflow_run_id, token=args.token)
+        job_links = {}
+    except Exception as e:
+        logging.error(f'Error occurred while getting job links. Error: {e}')
     # To deal with `workflow_call` event, where a job name is the combination of the job names in the caller and callee.
     # For example, `PyTorch 1.11 / Model tests (models/albert, single-gpu)`.
     if _job_links:
@@ -262,16 +270,19 @@ if __name__ == "__main__":
     for item in most_common:
         print(item)
 
-    with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
-        json.dump(errors, fp, ensure_ascii=False, indent=4)
+    try:
+        with open(os.path.join(args.output_dir, 'errors.log'), 'w', encoding='UTF-8') as fp:
+            json.dump(errors, fp, ensure_ascii=False, indent=4)
 
-    reduced_by_error = reduce_by_error(errors)
-    reduced_by_model = reduce_by_model(errors)
+        reduced_by_error = reduce_by_error(errors)
+        reduced_by_model = reduce_by_model(errors)
 
-    s1 = make_github_table(reduced_by_error)
-    s2 = make_github_table_per_model(reduced_by_model)
+        s1 = make_github_table(reduced_by_error)
+        s2 = make_github_table_per_model(reduced_by_model)
 
-    with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
-        fp.write(s1)
-    with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
-        fp.write(s2)
+        with open(os.path.join(args.output_dir, 'reduced_by_error.log'), 'w', encoding='UTF-8') as fp:
+            fp.write(s1)
+        with open(os.path.join(args.output_dir, 'reduced_by_model.log'), 'w', encoding='UTF-8') as fp:
+            fp.write(s2)
+    except Exception as e:
+        logging.error(f'Error occurred while writing error messages and logs. Error: {e}')
