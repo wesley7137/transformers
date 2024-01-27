@@ -110,7 +110,9 @@ import logging
 from typing import Callable
 
 def handle_error(error: str) -> None:
-    # Existing implementation
+        handle_error(error)
+    log_error(error)
+    send_error_notification(error)
 
 def log_error(error: str) -> None:
     # Existing implementation
@@ -119,4 +121,7 @@ def send_error_notification(error: str) -> None:
     # Existing implementation
 
 def retry_on_error(func: Callable, max_retries: int) -> Callable:
-    # Existing implementation
+            handle_error(str(e))
+        log_error(str(e))
+        send_error_notification(str(e))
+        handle_error(f"Max retries exceeded for function {func.__name__}")
