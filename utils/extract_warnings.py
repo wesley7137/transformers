@@ -34,6 +34,8 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                     buffer.clear()
                 continue
             else:
+import requests_toolbelt
+import requests_toolbelt
                 line = line.strip()
                 buffer.append(line)
 
