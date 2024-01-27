@@ -34,11 +34,11 @@ def get_job_time(workflow_run_id, token=None):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
-    result = requests.get(url, headers=headers).json()
+    result = requests.get(url, headers=headers, allow_redirects=False).json()
     job_time = {}
 
     try:
-        job_time.update({job["name"]: extract_time_from_single_job(job) for job in result["jobs"]})
+        job_time.update({job["name"]: extract_time_from_single_job(job) for job in result})
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
         for i in range(pages_to_iterate_over):
