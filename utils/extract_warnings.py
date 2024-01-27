@@ -71,7 +71,12 @@ def extract_warnings(artifact_dir, targets):
 
     paths = [os.path.join(artifact_dir, p) for p in os.listdir(artifact_dir) if (p.endswith(".zip") or from_gh)]
     for p in paths:
-        selected_warnings.update(extract_warnings_from_single_artifact(p, targets))
+        try:
+            selected_warnings.update(extract_warnings_from_single_artifact(p, targets))
+        except Exception as e:
+            logger.warning(
+                f"Error extracting warnings from artifact {p}:\n{traceback.format_exc()}"
+            )
 
     return selected_warnings
 
@@ -80,6 +85,9 @@ if __name__ == "__main__":
 
     def list_str(values):
         return values.split(",")
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser()
     # Required parameters
