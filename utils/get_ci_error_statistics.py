@@ -7,6 +7,7 @@ import traceback
 import zipfile
 from collections import Counter
 
+from error_handling import handle_error, log_error
 import requests
 
 
@@ -30,8 +31,8 @@ def get_job_links(workflow_run_id, token=None):
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    except Exception as e:
+        print(f"Error while fetching links:\n{e}\nStack trace:\n{traceback.format_exc()}")
 
     return {}
 
@@ -56,8 +57,8 @@ def get_artifacts_links(worflow_run_id, token=None):
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
         return artifacts
-    except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    except Exception as e:
+        print(f"Error while fetching links:\n{e}\nStack trace:\n{traceback.format_exc()}")
 
     return {}
 
