@@ -82,6 +82,32 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
 
 
 def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
+    try:
+        errors = []
+        failed_tests = []
+        job_name = None
+        with zipfile.ZipFile(artifact_zip_path) as z:
+            for filename in z.namelist():
+                if not os.path.isdir(filename):
+                    if filename in ["failures_line.txt", "summary_short.txt", "job_name.txt"]:
+                        with z.open(filename) as f:
+                            for line in f:
+                                line = line.decode("UTF-8").strip()
+                                if filename == "failures_line.txt":
+                                    try:
+                                        error_line = line[: line.index(": ")]
+                                        error = line[line.index(": ") + len(": ") :]
+                                        errors.append([error_line, error])
+                                    except Exception:
+                                        pass
+                                elif filename == "summary_short.txt" and line.startswith("FAILED "):
+                                    test = line[len("FAILED") :]
+                                    failed_tests.append(test)
+                                elif filename == "job_name.txt":
+                                    job_name = line
+    except Exception as e:
+        print(f"Error processing artifact {artifact_zip_path}: {e}")
+        print(traceback.format_exc())
     """Extract errors from a downloaded artifact (in .zip format)"""
     errors = []
     failed_tests = []
