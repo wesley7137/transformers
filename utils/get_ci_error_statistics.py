@@ -10,7 +10,7 @@ from collections import Counter
 import requests
 
 
-def get_job_links(workflow_run_id, token=None):
+def get_job_links(workflow_run_id: str, token: str = None) -> dict:  # Add type hints and docstring
     """Extract job names and their job links in a GitHub Actions workflow run"""
 
     headers = None
@@ -55,14 +55,14 @@ def get_artifacts_links(worflow_run_id, token=None):
             result = requests.get(url + f"&page={i + 2}", headers=headers).json()
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
-        return artifacts
+        return artifacts  # Add type hints and return type for get_artifacts_links
     except Exception:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
 
 
-def download_artifact(artifact_name, artifact_url, output_dir, token):
+def download_artifact(artifact_name: str, artifact_url: str, output_dir: str, token: str) -> None:  # Add type hints and docstring
     """Download a GitHub Action artifact from a URL.
 
     The URL is of the form `https://api.github.com/repos/huggingface/transformers/actions/artifacts/{ARTIFACT_ID}/zip`,
@@ -81,7 +81,7 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
         fp.write(response.content)
 
 
-def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
+def get_errors_from_single_artifact(artifact_zip_path: str, job_links: dict = None) -> list:  # Add type hints and docstring
     """Extract errors from a downloaded artifact (in .zip format)"""
     errors = []
     failed_tests = []
