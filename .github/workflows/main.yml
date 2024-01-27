@@ -1,0 +1,47 @@
+Contents of the updated ".github/workflows/main.yml" file:
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest
+
+      - name: Build and deploy
+        run: |
+          # Add build and deploy commands here
+
+This updated workflow configuration performs the following steps:
+1. Checks out the code.
+2. Sets up Python 3.8.
+3. Installs the project dependencies.
+4. Runs the tests using pytest.
+5. Builds and deploys the project (add the necessary commands).
+
+Please note that the "Build and deploy" step should be updated with the actual build and deploy commands specific to your project.
+
+When writing unit tests, ensure to cover all the relevant functions and classes in the workflow. Create mocks when necessary to simulate different scenarios.
+
+Commit message: "feat/fix: Update workflow configuration to fix failing GitHub Actions job(s)"

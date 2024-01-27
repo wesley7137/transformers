@@ -17,7 +17,7 @@ limitations under the License.
 # Generating the documentation
 
 To generate the documentation, you first have to build it. Several packages are necessary to build the doc, 
-you can install them with the following command, at the root of the code repository:
+you can install them with the following command, at the root of the code repository. Add the following additional command to install the get_ci_error_statistics module:
 
 ```bash
 pip install -e ".[docs]"
@@ -43,6 +43,8 @@ Once you have setup the `doc-builder` and additional packages, you can generate 
 typing the following command:
 
 ```bash
+pip install '.[ci_error_statistics]'
+# Install the get_ci_error_statistics module
 doc-builder build transformers docs/source/en/ --build_dir ~/tmp/test-build
 ```
 
