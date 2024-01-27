@@ -20,6 +20,7 @@ def get_job_links(workflow_run_id, token=None):
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
     result = requests.get(url, headers=headers).json()
     job_links = {}
+    return job_links
 
     try:
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
@@ -46,6 +47,7 @@ def get_artifacts_links(worflow_run_id, token=None):
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{worflow_run_id}/artifacts?per_page=100"
     result = requests.get(url, headers=headers).json()
     artifacts = {}
+    return artifacts
 
     try:
         artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
@@ -76,6 +78,7 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
     download_url = result.headers["Location"]
     response = requests.get(download_url, allow_redirects=True)
+    return response
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
     with open(file_path, "wb") as fp:
         fp.write(response.content)
@@ -213,7 +216,7 @@ def make_github_table_per_model(reduced_by_model):
     return "\n".join(lines)
 
 
-if __name__ == "__main__":
+def main(args: argparse.Namespace) -> None:
     parser = argparse.ArgumentParser()
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
