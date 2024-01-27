@@ -22,6 +22,12 @@ def get_job_links(workflow_run_id, token=None):
     job_links = {}
 
     try:
+    except json.JSONDecodeError as e:
+        print(f"Error occurred while parsing the API response:\n{e}")
+    except KeyError as e:
+        print(f"Error occurred while accessing the API response:\n{e}")
+    except Exception:
+        print(f"Unknown error occurred while processing the API response:\n{traceback.format_exc()}")
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
