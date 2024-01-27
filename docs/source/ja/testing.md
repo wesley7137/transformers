@@ -1158,6 +1158,11 @@ pytest tests/utils/test_logging.py -W error::UserWarning --pdb
 3. このブランチからPRを作成します。
 4. その後、このジョブが[ここ](https://github.com/huggingface/transformers/actions/workflows/self-push.yml)に表示されます。ジョブはバックログがある場合、すぐに実行されないことがあります。
 
+**Note:** Please provide the specific error logs observed in the failing GitHub Actions run in the issue description. This will help in further investigating the issue and providing a resolution.
+4. To rerun the failing GitHub Actions job and observe the error logs, follow these steps:
+   - Open the failing GitHub Actions job [here](https://github.com/huggingface/transformers/actions/workflows/self-push.yml).
+   - Review the logs for the failing job to observe the specific error messages encountered during the run.
+
 ## Testing Experimental CI Features
 
 CI機能のテストは通常のCIの正常な動作に干渉する可能性があるため、新しいCI機能を追加する場合、以下の手順に従う必要があります。
