@@ -109,6 +109,31 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     from_gh = args.from_gh
+    if from_gh:      # The artifacts have to be downloaded using `actions/download-artifact@v3`
+        pass
+    else:
+        os.makedirs(args.output_dir, exist_ok=True)
+
+        # get download links
+        artifacts = get_artifacts_links(args.workflow_run_id, token=args.token)
+        with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="UTF-8") as fp:
+            json.dump(artifacts, fp, ensure_ascii=False, indent=4)
+
+        # download artifacts
+        for idx, (name, url) in enumerate(artifacts.items()):
+            print(name)
+            print(url)
+            print("=" * 80)
+            download_artifact(name, url, args.output_dir, args.token)
+            # Be gentle to GitHub
+            
+        time.sleep(1)
+
+    # extract warnings from artifacts
+    selected_warnings = extract_warnings(args.output_dir, args.targets)
+    selected_warnings = sorted(selected_warnings)
+    with open(os.path.join(args.output_dir, "selected_warnings.json"), "w", encoding="UTF-8") as fp:
+        json.dump(selected_warnings, fp, ensure_ascii=False, indent=4)
     if from_gh:
         # The artifacts have to be downloaded using `actions/download-artifact@v3`
         pass
