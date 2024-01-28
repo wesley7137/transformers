@@ -56,7 +56,7 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                             continue
                         with z.open(filename) as fp:
                             parse_line(fp)
-        except Exception:
+        except (zipfile.BadZipFile, FileNotFoundError) as e:
             logger.warning(
                 f"{artifact_path} is either an invalid zip file or something else wrong. This file is skipped."
             )
@@ -119,6 +119,8 @@ if __name__ == "__main__":
             json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 
         # download artifacts
+        if not args.from_gh:
+            os.makedirs(args.output_dir, exist_ok=True)
         for idx, (name, url) in enumerate(artifacts.items()):
             print(name)
             print(url)
