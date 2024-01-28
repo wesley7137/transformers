@@ -46,8 +46,9 @@ def get_job_time(workflow_run_id, token=None):
             job_time.update({job["name"]: extract_time_from_single_job(job) for job in result["jobs"]})
 
         return job_time
-    except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    except Exception as e:
+        import logging
+        logging.error(f"An error occurred while fetching job time information: {str(e)}")
 
     return {}
 
