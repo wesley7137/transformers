@@ -262,7 +262,9 @@ class Message:
     # Link to the GitHub Action job
     doc_test_results["job_link"] = github_actions_job_links.get("run_doctests")
 
-    artifact_path = available_artifacts["doc_tests_gpu_test_reports"].paths[0]
+    artifact = available_artifacts.get("doc_tests_gpu_test_reports")
+if artifact:
+    artifact_path = artifact.paths[0]
     artifact = retrieve_artifact(artifact_path["name"])
     if "stats" in artifact:
         failed, success, time_spent = handle_test_results(artifact["stats"])
