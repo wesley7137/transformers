@@ -63,7 +63,7 @@ def extract_first_line_failure(failures_short_lines):
 
 
 class Message:
-    def __init__(self, title: str, doc_test_results: Dict):
+    def __init__(self, title: str, doc_test_results: Dict) -> None:
         self.title = title
 
         self._time_spent = doc_test_results["time_spent"].split(",")[0]
