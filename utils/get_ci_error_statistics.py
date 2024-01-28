@@ -212,7 +212,7 @@ def reduce_by_model(logs, error_filter=None):
             r[test] = {"count": n_errors, "errors": error_counts}
 
     r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
-    return r
+    return '\n'.join(lines)r
 
 
 def make_github_table(reduced_by_error):
