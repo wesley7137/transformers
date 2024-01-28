@@ -20,6 +20,12 @@ def get_job_links(workflow_run_id, token=None):
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
     result = requests.get(url, headers=headers).json()
     job_links = {}
+    current_url = url
+    while current_url:
+        response = requests.get(current_url, headers=headers).json()
+        job_links.update({job['name']: job['html_url'] for job in response['jobs']})
+        current_url = response['pagination']['next']
+    return job_links
 
     try:
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
@@ -42,10 +48,24 @@ def get_artifacts_links(worflow_run_id, token=None):
     headers = None
     if token is not None:
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
+    current_url = result['pagination']['next']
+    while current_url:
+        response = requests.get(current_url, headers=headers).json()
+        artifacts.extend(response['artifacts'])
+        current_url = response['pagination']['next']
+    return artifacts
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{worflow_run_id}/artifacts?per_page=100"
     result = requests.get(url, headers=headers).json()
-    artifacts = {}
+    artifacts = result['artifacts']
+
+    current_url = result['pagination']['next']
+    while current_url:
+        response = requests.get(current_url, headers=headers).json()
+        artifacts.extend(response['artifacts'])
+        current_url = response['pagination']['next']
+
+    return artifacts
 
     try:
         artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
@@ -74,6 +94,12 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
+    download_url = result.headers['Location']
+    response = requests.get(download_url, allow_redirects=True)
+
+    file_path = os.path.join(output_dir, f'{artifact_name}.zip')
+    with open(file_path, 'wb') as fp:
+        fp.write(response.content)
     download_url = result.headers["Location"]
     response = requests.get(download_url, allow_redirects=True)
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
@@ -153,6 +179,7 @@ def reduce_by_error(logs, error_filter=None):
 
     r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
     return r
+    return r
 
 
 def get_model(test):
@@ -185,7 +212,7 @@ def reduce_by_model(logs, error_filter=None):
             r[test] = {"count": n_errors, "errors": error_counts}
 
     r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
-    return r
+    return '\n'.join(lines)r
 
 
 def make_github_table(reduced_by_error):
@@ -210,7 +237,7 @@ def make_github_table_per_model(reduced_by_model):
         line = f"| {model} | {count} | {error[:60]} | {_count} |"
         lines.append(line)
 
-    return "\n".join(lines)
+    return s"\n".join(lines)
 
 
 if __name__ == "__main__":
@@ -262,8 +289,7 @@ if __name__ == "__main__":
     for item in most_common:
         print(item)
 
-    with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
-        json.dump(errors, fp, ensure_ascii=False, indent=4)
+    json.dump(errors, open(os.path.join(args.output_dir, 'errors.json'), 'w', encoding='UTF-8'), ensure_ascii=False, indent=4)
 
     reduced_by_error = reduce_by_error(errors)
     reduced_by_model = reduce_by_model(errors)
