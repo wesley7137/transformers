@@ -13,15 +13,39 @@ import requests
 def get_job_links(workflow_run_id, token=None):
     """Extract job names and their job links in a GitHub Actions workflow run"""
 
-    headers = None
-    if token is not None:
+    # Set the 'headers' variable to None for initialisation.
+    # Add headers for token if it is not None.
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
-    url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
+    url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"  # Constructs the URL for fetching job links.
     result = requests.get(url, headers=headers).json()
     job_links = {}
 
     try:
+        job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
+        pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
+
+        for i in range(pages_to_iterate_over):
+            result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+            job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
+
+        return job_links
+    except Exception:
+        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+
+    return {}
+        artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
+        pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
+    
+        for i in range(pages_to_iterate_over):
+            result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+            artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
+    
+        return artifacts
+    except Exception:
+        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    
+    return {}
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
@@ -76,7 +100,7 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
     download_url = result.headers["Location"]
     response = requests.get(download_url, allow_redirects=True)
-    file_path = os.path.join(output_dir, f"{artifact_name}.zip")
+    file_path = os.path.join(output_dir, f"{artifact_name}.zip")  # Construct the file path for the downloaded artifact.
     with open(file_path, "wb") as fp:
         fp.write(response.content)
 
@@ -91,9 +115,27 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
         for filename in z.namelist():
             if not os.path.isdir(filename):
                 # read the file
-                if filename in ["failures_line.txt", "summary_short.txt", "job_name.txt"]:
+                if filename in ["failures_line.txt", "summary_short.txt", "job_name.txt", "error_logs.txt"]:
                     with z.open(filename) as f:
                         for line in f:
+                            line = line.decode("UTF-8").strip()
+                            if filename == "failures_line.txt":
+                                try:
+                                    # `error_line` is the place where `error` occurs
+                                    error_line = line[: line.index(": ")]
+                                    error = line[line.index(": ") + len(": ") :]
+                                    errors.append([error_line, error])
+                                except Exception:
+                                    # skip un-related lines
+                                    pass
+                            elif filename == "summary_short.txt" and line.startswith("FAILED "):
+                                # `test` is the test method that failed
+                                test = line[len("FAILED ") :]
+                                failed_tests.append(test)
+                            elif filename == "job_name.txt":
+                                job_name = line
+                            elif filename == "error_logs.txt":
+                                error_logs.append(line)
                             line = line.decode("UTF-8").strip()
                             if filename == "failures_line.txt":
                                 try:
@@ -126,6 +168,19 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
     result = [x + [y] + [job_link] for x, y in zip(errors, failed_tests)]
 
     return result
+    
+    
+    def get_all_errors(artifact_dir, job_links=None):
+    """Extract errors from all artifact files"""
+    
+    errors = []
+    error_logs = []
+    
+    paths = [os.path.join(artifact_dir, p) for p in os.listdir(artifact_dir) if p.endswith(".zip")]
+    for p in paths:
+        errors.extend(get_errors_from_single_artifact(p, job_links=job_links))
+    
+    return errors, error_logs
 
 
 def get_all_errors(artifact_dir, job_links=None):
@@ -153,6 +208,31 @@ def reduce_by_error(logs, error_filter=None):
 
     r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
     return r
+    
+    
+    def make_github_table(reduced_by_error):
+    header = "| no. | error | status |"
+    sep = "|-:|:-|:-|"
+    lines = [header, sep]
+    for error in reduced_by_error:
+        count = reduced_by_error[error]["count"]
+        line = f"| {count} | {error[:100]} |  |"
+        lines.append(line)
+    
+    return "\n".join(lines)
+    
+    
+    def make_github_table_per_model(reduced_by_model):
+    header = "| model | no. of errors | major error | count |"
+    sep = "|-:|-:|-:|-:|"
+    lines = [header, sep]
+    for model in reduced_by_model:
+        count = reduced_by_model[model]["count"]
+        error, _count = list(reduced_by_model[model]["errors"].items())[0]
+        line = f"| {model} | {count} | {error[:60]} | {_count} |"
+        lines.append(line)
+    
+    return "\n".join(lines)
 
 
 def get_model(test):
@@ -214,7 +294,7 @@ def make_github_table_per_model(reduced_by_model):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser()  # Create an argument parser for the input parameters.
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
     parser.add_argument(
