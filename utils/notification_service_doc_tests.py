@@ -17,6 +17,7 @@ import json
 import math
 import os
 import re
+import re
 import time
 from fnmatch import fnmatch
 from typing import Dict
@@ -63,7 +64,7 @@ def extract_first_line_failure(failures_short_lines):
 
 
 class Message:
-    def __init__(self, title: str, doc_test_results: Dict):
+    def __init__(self, title: str, doc_test_results: Dict) -> None:
         self.title = title
 
         self._time_spent = doc_test_results["time_spent"].split(",")[0]
@@ -73,6 +74,7 @@ class Message:
 
         # Failures and success of the modeling tests
         self.doc_test_results = doc_test_results
+        self.doc_test_results["job_link"] = github_actions_job_links.get("run_doctests")
 
     @property
     def time(self) -> str:
@@ -199,8 +201,11 @@ class Message:
         )
 
     def post(self):
-        print("Sending the following payload")
-        print(json.dumps({"blocks": json.loads(self.payload)}))
+        client.chat_postMessage(
+            channel=os.environ["CI_SLACK_CHANNEL_ID_DAILY"],
+            text="There was an issue running the tests.",
+            blocks=self.payload,
+        )
 
         text = f"{self.n_failures} failures out of {self.n_tests} tests," if self.n_failures else "All tests passed."
 
@@ -238,48 +243,58 @@ class Message:
 
         job_link = self.doc_test_results.pop("job_link")
         self.doc_test_results.pop("failures")
-        self.doc_test_results.pop("success")
-        self.doc_test_results.pop("time_spent")
+        [
+            ("*.py", "API Examples"),
+            ("*.md", "MD Examples"),
+        ]
+    )
 
-        sorted_dict = sorted(self.doc_test_results.items(), key=lambda t: t[0])
-        for job, job_result in sorted_dict:
-            if len(job_result["failures"]):
-                text = f"*Num failures* :{len(job_result['failed'])} \n"
-                failures = job_result["failures"]
-                blocks = self.get_reply_blocks(job, job_link, failures, text=text)
+    # This dict will contain all the information relative to each doc test category:
+    # - failed: list of failed tests
+    # - failures: dict in the format 'test': 'error_message'
+    doc_test_results = {
+        v: {
+            "failed": [],
+            "failures": {},
+        }
+        for v in docs.values()
+    }
 
-                print("Sending the following reply")
-                print(json.dumps({"blocks": blocks}))
+    # Link to the GitHub Action job
+    doc_test_results["job_link"] = github_actions_job_links.get("run_doctests")
 
-                client.chat_postMessage(
-                    channel=os.environ["CI_SLACK_CHANNEL_ID_DAILY"],
-                    text=f"Results for {job}",
-                    blocks=blocks,
-                    thread_ts=self.thread_ts["ts"],
-                )
+    artifact = available_artifacts.get("doc_tests_gpu_test_reports")
+if artifact:
+    artifact_path = artifact.paths[0]
+    artifact = retrieve_artifact(artifact_path["name"])
+    if "stats" in artifact:
+        failed, success, time_spent = handle_test_results(artifact["stats"])
+        doc_test_results["failures"] = failed
+        doc_test_results["success"] = success
+        doc_test_results["time_spent"] = time_spent[1:-1] + ", "
 
-                time.sleep(1)
+        all_failures = extract_first_line_failure(artifact["failures_short"])
+        for line in artifact["summary_short"].split("\n"):
+            if re.search("FAILED", line):
+                line = line.replace("FAILED ", "")
+                line = line.split()[0].replace("\n", "")
 
+                if "::" in line:
+                    file_path, test = line.split("::")
+                else:
+                    file_path, test = line, line
 
-def get_job_links():
-    run_id = os.environ["GITHUB_RUN_ID"]
-    url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{run_id}/jobs?per_page=100"
-    result = requests.get(url).json()
-    jobs = {}
+                for file_regex in docs.keys():
+                    if fnmatch(file_path, file_regex):
+                        category = docs[file_regex]
+                        doc_test_results[category]["failed"].append(test)
 
-    try:
-        jobs.update({job["name"]: job["html_url"] for job in result["jobs"]})
-        pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
+                        failure = all_failures[test] if test in all_failures else "N/A"
+                        doc_test_results[category]["failures"][test] = failure
+                        break
 
-        for i in range(pages_to_iterate_over):
-            result = requests.get(url + f"&page={i + 2}").json()
-            jobs.update({job["name"]: job["html_url"] for job in result["jobs"]})
-
-        return jobs
-    except Exception as e:
-        print("Unknown error, could not fetch links.", e)
-
-    return {}
+    message = Message("🤗 Results of the doc tests.", doc_test_results)
+    message.post()
 
 
 def retrieve_artifact(name: str):
@@ -328,8 +343,8 @@ if __name__ == "__main__":
 
     docs = collections.OrderedDict(
         [
-            ("*.py", "API Examples"),
-            ("*.md", "MD Examples"),
+            ("*.ipynb", "Notebook Examples"),
+            ("*.md", "Markdown Examples"),
         ]
     )
 
@@ -361,8 +376,9 @@ if __name__ == "__main__":
                 line = line.replace("FAILED ", "")
                 line = line.split()[0].replace("\n", "")
 
-                if "::" in line:
-                    file_path, test = line.split("::")
+                if re.search("::", line):
+                    match = re.match(r'(.*?)\s+(.*)', line)
+                    file_path, test = match.groups()
                 else:
                     file_path, test = line, line
 
