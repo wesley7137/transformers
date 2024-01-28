@@ -237,7 +237,7 @@ def make_github_table_per_model(reduced_by_model):
         line = f"| {model} | {count} | {error[:60]} | {_count} |"
         lines.append(line)
 
-    return "\n".join(lines)
+    return s"\n".join(lines)
 
 
 if __name__ == "__main__":
