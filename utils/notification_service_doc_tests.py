@@ -17,6 +17,7 @@ import json
 import math
 import os
 import re
+import re
 import time
 from fnmatch import fnmatch
 from typing import Dict
@@ -375,8 +376,9 @@ if __name__ == "__main__":
                 line = line.replace("FAILED ", "")
                 line = line.split()[0].replace("\n", "")
 
-                if "::" in line:
-                    file_path, test = line.split("::")
+                if re.search("::", line):
+                    match = re.match(r'(.*?)\s+(.*)', line)
+                    file_path, test = match.groups()
                 else:
                     file_path, test = line, line
 
