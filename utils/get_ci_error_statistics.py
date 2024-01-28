@@ -18,7 +18,8 @@ def get_job_links(workflow_run_id, token=None):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
-    result = job_links = {}
+    result = requests.get(url, headers=headers).json()
+    job_links = {}
     current_url = url
     while current_url:
         response = requests.get(current_url, headers=headers).json()
@@ -47,6 +48,12 @@ def get_artifacts_links(worflow_run_id, token=None):
     headers = None
     if token is not None:
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
+    current_url = result['pagination']['next']
+    while current_url:
+        response = requests.get(current_url, headers=headers).json()
+        artifacts.extend(response['artifacts'])
+        current_url = response['pagination']['next']
+    return artifacts
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{worflow_run_id}/artifacts?per_page=100"
     result = requests.get(url, headers=headers).json()
