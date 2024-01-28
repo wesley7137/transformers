@@ -179,7 +179,7 @@ class Message:
                 "type": "section",
                 "text": {
                     "type": "plain_text",
-                    "text": "There was an issue running the tests.",
+                    "text": "An error occurred during the job execution.",
                 },
                 "accessory": {
                     "type": "button",
@@ -194,7 +194,7 @@ class Message:
 
         client.chat_postMessage(
             channel=os.environ["CI_SLACK_CHANNEL_ID_DAILY"],
-            text="There was an issue running the tests.",
+            text='An error occurred during the job execution.',
             blocks=payload,
         )
 

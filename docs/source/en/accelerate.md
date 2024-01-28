@@ -18,9 +18,15 @@ rendered properly in your Markdown viewer.
 
 As models get bigger, parallelism has emerged as a strategy for training larger models on limited hardware and accelerating training speed by several orders of magnitude. At Hugging Face, we created the [🤗 Accelerate](https://huggingface.co/docs/accelerate) library to help users easily train a 🤗 Transformers model on any type of distributed setup, whether it is multiple GPU's on one machine or multiple GPU's across several machines. In this tutorial, learn how to customize your native PyTorch training loop to enable training in a distributed environment.
 
-## Setup
+## Troubleshooting GitHub Actions
 
 Get started by installing 🤗 Accelerate:
+
+Before proceeding, ensure that you have GitHub Actions configured correctly.
+```diff
+- pip install accelerate
++ pip install --upgrade accelerate \\n# If the installation fails, check for network connectivity issues and ensure that the GitHub Actions runner has access to the required package repositories.
+```
 
 ```bash
 pip install accelerate
@@ -109,7 +115,7 @@ As you can see in the following code, you only need to add four additional lines
 
 Once you've added the relevant lines of code, launch your training in a script or a notebook like Colaboratory.
 
-### Train with a script
+### Troubleshooting GitHub Actions \\nIf you encounter issues with GitHub Actions, consider the following troubleshooting steps.
 
 If you are running your training from a script, run the following command to create and save a configuration file:
 
