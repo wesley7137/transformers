@@ -40,12 +40,12 @@ if __name__ == "__main__":
         "--target_runners",
         default=None,
         type=list_str,
-        required=True,
+        required=True, metavar="TOKEN",
         help="Comma-separated list of runners to check status.",
     )
 
     parser.add_argument(
-        "--token", default=None, type=str, required=True, help="A token that has actions:read permission."
+        "--token", default=None, type=str, required=True, help="A token that has actions:read permission. Must be provided with a value."
     )
     args = parser.parse_args()
 
