@@ -73,12 +73,10 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     if token is not None:
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
-    result = requests.get(artifact_url, headers=headers, allow_redirects=False)
-    download_url = result.headers["Location"]
-    response = requests.get(download_url, allow_redirects=True)
+    result = requests.get(artifact_url, headers=headers, allow_redirects=True)
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
     with open(file_path, "wb") as fp:
-        fp.write(response.content)
+        fp.write(result.content)
 
 
 def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
@@ -124,7 +122,6 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
 
     # A list with elements of the form (line of error, error, failed test)
     result = [x + [y] + [job_link] for x, y in zip(errors, failed_tests)]
-
     return result
 
 
@@ -185,10 +182,6 @@ def reduce_by_model(logs, error_filter=None):
             r[test] = {"count": n_errors, "errors": error_counts}
 
     r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
-    return r
-
-
-def make_github_table(reduced_by_error):
     header = "| no. | error | status |"
     sep = "|-:|:-|:-|"
     lines = [header, sep]
