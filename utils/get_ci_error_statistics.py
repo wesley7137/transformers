@@ -13,11 +13,11 @@ import requests
 def get_job_links(workflow_run_id, token=None):
     """Extract job names and their job links in a GitHub Actions workflow run"""
 
-    headers = None
-    if token is not None:
+    # Set the 'headers' variable to None for initialisation.
+    # Add headers for token if it is not None.
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
-    url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
+    url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"  # Constructs the URL for fetching job links.
     result = requests.get(url, headers=headers).json()
     job_links = {}
 
@@ -100,7 +100,7 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
     download_url = result.headers["Location"]
     response = requests.get(download_url, allow_redirects=True)
-    file_path = os.path.join(output_dir, f"{artifact_name}.zip")
+    file_path = os.path.join(output_dir, f"{artifact_name}.zip")  # Construct the file path for the downloaded artifact.
     with open(file_path, "wb") as fp:
         fp.write(response.content)
 
@@ -294,7 +294,7 @@ def make_github_table_per_model(reduced_by_model):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser()  # Create an argument parser for the input parameters.
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
     parser.add_argument(
