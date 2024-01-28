@@ -18,7 +18,9 @@ def get_job_links(workflow_run_id, token=None):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
-    result = requests.get(url, headers=headers).json()
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    result = response.json()
     job_links = {}
 
     try:
@@ -44,7 +46,9 @@ def get_artifacts_links(worflow_run_id, token=None):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{worflow_run_id}/artifacts?per_page=100"
-    result = requests.get(url, headers=headers).json()
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    result = response.json()
     artifacts = {}
 
     try:
@@ -76,6 +80,7 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
     download_url = result.headers["Location"]
     response = requests.get(download_url, allow_redirects=True)
+    response.raise_for_status()
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
     with open(file_path, "wb") as fp:
         fp.write(response.content)
@@ -265,7 +270,11 @@ if __name__ == "__main__":
     with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
         json.dump(errors, fp, ensure_ascii=False, indent=4)
 
-    reduced_by_error = reduce_by_error(errors)
+    try:
+        reduced_by_error = reduce_by_error(errors)
+    except Exception as e:
+        print(f'Failed to reduce errors: {str(e)}')
+        reduced_by_error = {}
     reduced_by_model = reduce_by_model(errors)
 
     s1 = make_github_table(reduced_by_error)
