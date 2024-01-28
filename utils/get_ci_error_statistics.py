@@ -83,7 +83,7 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
 
 def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
     """Extract errors from a downloaded artifact (in .zip format)"""
-    errors = []
+    warnings = []
     failed_tests = []
     job_name = None
 
