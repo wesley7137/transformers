@@ -75,7 +75,11 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
 
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
     download_url = result.headers["Location"]
-    response = requests.get(download_url, allow_redirects=True)
+    try:
+        response = requests.get(download_url, allow_redirects=True)
+    except Exception as e:
+        print(f"Failed to get redirect URL:\n{e}")
+        response = None
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
     with open(file_path, "wb") as fp:
         fp.write(response.content)
@@ -228,7 +232,7 @@ if __name__ == "__main__":
 
     os.makedirs(args.output_dir, exist_ok=True)
 
-    _job_links = get_job_links(args.workflow_run_id, token=args.token)
+    _job_links = get_job_links(args.workflow_run_id, token=args.token if args.token else None)
     job_links = {}
     # To deal with `workflow_call` event, where a job name is the combination of the job names in the caller and callee.
     # For example, `PyTorch 1.11 / Model tests (models/albert, single-gpu)`.
@@ -251,11 +255,15 @@ if __name__ == "__main__":
         # Be gentle to GitHub
         time.sleep(1)
 
-    errors = get_all_errors(args.output_dir, job_links=job_links)
+    try:
+        errors = get_all_errors(args.output_dir, job_links=job_links)
+    except Exception as e:
+        print(f"Failed to retrieve errors:\n{e}")
+        errors = []
 
     # `e[1]` is the error
     counter = Counter()
-    counter.update([e[1] for e in errors])
+    counter.update([e[1] for e in errors if len(e) > 1])
 
     # print the top 30 most common test errors
     most_common = counter.most_common(30)
