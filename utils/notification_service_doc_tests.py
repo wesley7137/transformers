@@ -73,6 +73,7 @@ class Message:
 
         # Failures and success of the modeling tests
         self.doc_test_results = doc_test_results
+        self.doc_test_results["job_link"] = github_actions_job_links.get("run_doctests")
 
     @property
     def time(self) -> str:
