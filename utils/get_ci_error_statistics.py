@@ -179,6 +179,7 @@ def reduce_by_error(logs, error_filter=None):
 
     r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
     return r
+    return r
 
 
 def get_model(test):
