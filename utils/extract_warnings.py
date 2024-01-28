@@ -103,6 +103,11 @@ if __name__ == "__main__":
         action="store_true",
         help="If running from a GitHub action workflow and collecting warnings from its artifacts.",
     )
+    
+    args = parser.parse_args()
+    
+    from_gh = args.from_gh
+    if from_gh:
 
     args = parser.parse_args()
 
