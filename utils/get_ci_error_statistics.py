@@ -50,7 +50,15 @@ def get_artifacts_links(worflow_run_id, token=None):
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{worflow_run_id}/artifacts?per_page=100"
     result = requests.get(url, headers=headers).json()
-    artifacts = {}
+    artifacts = result['artifacts']
+
+    current_url = result['pagination']['next']
+    while current_url:
+        response = requests.get(current_url, headers=headers).json()
+        artifacts.extend(response['artifacts'])
+        current_url = response['pagination']['next']
+
+    return artifacts
 
     try:
         artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
