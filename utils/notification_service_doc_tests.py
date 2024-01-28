@@ -339,8 +339,8 @@ if __name__ == "__main__":
 
     docs = collections.OrderedDict(
         [
-            ("*.py", "API Examples"),
-            ("*.md", "MD Examples"),
+            ("*.ipynb", "Notebook Examples"),
+            ("*.md", "Markdown Examples"),
         ]
     )
 
