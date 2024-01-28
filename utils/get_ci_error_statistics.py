@@ -251,8 +251,6 @@ if __name__ == "__main__":
         # Be gentle to GitHub
         time.sleep(1)
 
-    errors = get_all_errors(args.output_dir, job_links=job_links)
-
     # `e[1]` is the error
     counter = Counter()
     counter.update([e[1] for e in errors])
