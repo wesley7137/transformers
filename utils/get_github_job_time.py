@@ -4,6 +4,10 @@ import traceback
 
 import dateutil.parser as date_parser
 import requests
+import os
+from dotenv import load_dotenv
+import os
+from dotenv import load_dotenv
 
 
 def extract_time_from_single_job(job):
