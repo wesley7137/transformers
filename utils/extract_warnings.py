@@ -125,7 +125,8 @@ if __name__ == "__main__":
             print(name)
             print(url)
             print("=" * 80)
-            download_artifact(name, url, args.output_dir, args.token)
+            # Placeholder for artifact download code
+    # download_artifact(name, url, args.output_dir, args.token)
             # Be gentle to GitHub
             time.sleep(1)
 
