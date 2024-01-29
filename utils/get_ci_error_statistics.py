@@ -234,10 +234,10 @@ def make_github_table_per_model(reduced_by_model):
 
 
 if __name__ == "__main__":
-    parser.add_argument("--error_status", type=str, default=None, help="Specify the error status.")
+    parser.add_argument("--output_file", type=str, default=None, help="Specify the output file path.")
     parser.add_argument("--model_errors", type=str, default=None, help="Specify the model errors.")
     parser.add_argument("--output_file", type=str, default=None, help="Specify the output file path.")
-    parser.add_argument("--error_status", default=None, type=str, help="Specify the error status.")
+    parser.add_argument("--output_file", default=None, type=str, help="Specify the output file path.")
     parser.add_argument("--model_errors", default=None, type=str, help="Specify the model errors.")
     parser.add_argument("--output_file", default=None, type=str, help="Specify the output file path.")
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
