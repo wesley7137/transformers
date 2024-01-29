@@ -36,7 +36,10 @@ def handle_test_results(test_results):
 
     # When the output is short enough, the output is surrounded by = signs: "== OUTPUT =="
     # When it is too long, those signs are not present.
-    time_spent = expressions[-2] if "=" in expressions[-1] else expressions[-1]
+    if "=" in expressions[-1]:
+        time_spent = expressions[-2]
+    else:
+        time_spent = expressions[-1]
 
     for i, expression in enumerate(expressions):
         if "failed" in expression:
@@ -95,6 +98,22 @@ class Message:
     @property
     def header(self) -> Dict:
         return {"type": "header", "text": {"type": "plain_text", "text": self.title}}
+    
+    @property
+    def no_failures(self) -> Dict:
+        return {
+            "type": "section",
+            "text": {
+                "type": "plain_text",
+                "text": f"🌞 There were no failures: all {self.n_tests} tests passed. The suite ran in {self.time}.",
+                "emoji": True,
+            },
+            "accessory": {
+                "type": "button",
+                "text": {"type": "plain_text", "text": "Check Action results", "emoji": True},
+                "url": f"https://github.com/huggingface/transformers/actions/runs/{os.environ['GITHUB_RUN_ID']}",
+            },
+        }
 
     @property
     def no_failures(self) -> Dict:
@@ -128,6 +147,32 @@ class Message:
                 "type": "button",
                 "text": {"type": "plain_text", "text": "Check Action results", "emoji": True},
                 "url": f"https://github.com/huggingface/transformers/actions/runs/{os.environ['GITHUB_RUN_ID']}",
+            },
+        }
+    
+    @property
+    def category_failures(self) -> Dict:
+        line_length = 40
+        category_failures = {k: v["failed"] for k, v in doc_test_results.items() if isinstance(v, dict)}
+    
+        report = ""
+        for category, failures in category_failures.items():
+            if len(failures) == 0:
+                continue
+    
+            if report != "":
+                report += "\n\n"
+    
+            report += f"*{category} failures*:".ljust(line_length // 2).rjust(line_length // 2) + "\n"
+            report += "`"
+            report += "`\n`".join(failures)
+            report += "`"
+    
+        return {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"The following examples had failures:\n\n\n{report}\n",
             },
         }
 
