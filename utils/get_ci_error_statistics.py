@@ -171,7 +171,7 @@ def reduce_by_error(logs, error_filter=None):
         if error_filter is None or error not in error_filter:
             r[error] = {"count": count, "failed_tests": [(x[2], x[0]) for x in logs if x[1] == error]}
 
-    r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
+    r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True)) if not error_filter else {error: r[error] for error in error_filter}
     return r
 
 
@@ -209,7 +209,7 @@ def reduce_by_model(logs, error_filter=None):
 
 
 def make_github_table(reduced_by_error):
-    header = "| no. | error | status |"
+    header = "| no. | error | status | count |"
     sep = "|-:|:-|:-|"
     lines = [header, sep]
     for error in reduced_by_error:
@@ -234,7 +234,11 @@ def make_github_table_per_model(reduced_by_model):
 
 
 if __name__ == "__main__":
-    parser.add_argument("--output_file", type=str, default=None, help="Specify the output file path.")
+    parser.add_argument('--error_status', type=str, default=None, help='Specify the error status.')
+parser.add_argument('--model_errors', type=str, default=None, help='Specify the model errors.')
+parser.add_argument('--output_file', type=str, default=None, help='Specify the output file path.')
+
+parser.add_argument("--output_file", type=str, default=None, help="Specify the output file path.")
     parser.add_argument("--model_errors", type=str, default=None, help="Specify the model errors.")
     parser.add_argument("--output_file", type=str, default=None, help="Specify the output file path.")
     parser.add_argument("--output_file", default=None, type=str, help="Specify the output file path.")
@@ -442,7 +446,7 @@ def make_github_table(reduced_by_error):
 
 
 def make_github_table_per_model(reduced_by_model):
-    header = "| model | no. of errors | major error | count |"
+    header = "| model | no. of errors | major error | count | status |"
     sep = "|-:|-:|-:|-:|"
     lines = [header, sep]
     for model in reduced_by_model:
