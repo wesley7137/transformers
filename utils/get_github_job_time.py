@@ -17,7 +17,7 @@ def extract_time_from_single_job(job):
     start_datetime = date_parser.parse(start)
     end_datetime = date_parser.parse(end)
 
-    duration_in_min = round((end_datetime - start_datetime).total_seconds() / 60.0)
+    duration_in_min = end_datetime - start_datetime
 
     job_info["started_at"] = start
     job_info["completed_at"] = end
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
     args = parser.parse_args()
 
-    job_time = get_job_time(args.workflow_run_id)
+    job_time = extract_time_from_single_job(args.workflow_run_id)
     job_time = dict(sorted(job_time.items(), key=lambda item: item[1]["duration"], reverse=True))
 
     for k, v in job_time.items():
