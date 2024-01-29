@@ -10,7 +10,7 @@ from collections import Counter
 import requests
 
 
-def get_job_links(workflow_run_id, token=None):
+def get_job_links(workflow_run_id, token=None, headers=None):
     """Extract job names and their job links in a GitHub Actions workflow run"""
 
     headers = None
@@ -224,7 +224,7 @@ if __name__ == "__main__":
         help="Where to store the downloaded artifacts and other result files.",
     )
     parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
 
