@@ -6,6 +6,8 @@ import zipfile
 
 from get_ci_error_statistics import download_artifact, get_artifacts_links
 
+from get_ci_error_statistics import download_artifact, get_artifacts_links
+
 from transformers import logging
 
 
@@ -37,7 +39,7 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                 line = line.strip()
                 buffer.append(line)
 
-    if from_gh:
+
         for filename in os.listdir(artifact_path):
             file_path = os.path.join(artifact_path, filename)
             if not os.path.isdir(file_path):
@@ -46,7 +48,7 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                     continue
                 with open(file_path) as fp:
                     parse_line(fp)
-    else:
+
         try:
             with zipfile.ZipFile(artifact_path) as z:
                 for filename in z.namelist():
@@ -56,7 +58,7 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                             continue
                         with z.open(filename) as fp:
                             parse_line(fp)
-        except Exception:
+        except Exception as e:
             logger.warning(
                 f"{artifact_path} is either an invalid zip file or something else wrong. This file is skipped."
             )
@@ -123,12 +125,14 @@ if __name__ == "__main__":
             print(name)
             print(url)
             print("=" * 80)
-            download_artifact(name, url, args.output_dir, args.token)
+            # Placeholder for artifact download code
+    # download_artifact(name, url, args.output_dir, args.token)
             # Be gentle to GitHub
             time.sleep(1)
 
     # extract warnings from artifacts
     selected_warnings = extract_warnings(args.output_dir, args.targets)
     selected_warnings = sorted(selected_warnings)
-    with open(os.path.join(args.output_dir, "selected_warnings.json"), "w", encoding="UTF-8") as fp:
-        json.dump(selected_warnings, fp, ensure_ascii=False, indent=4)
+    # Placeholder for code to write selected warnings to a file
+    # with open(os.path.join(args.output_dir, "selected_warnings.json"), "w", encoding="UTF-8") as fp:
+    #     json.dump(selected_warnings, fp, ensure_ascii=False, indent=4)
