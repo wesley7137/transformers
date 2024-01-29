@@ -52,7 +52,7 @@ def get_job_time(workflow_run_id, token=None):
     return {}
 
 
-if __name__ == "__main__":
+def main():
     r"""
     Example:
 
