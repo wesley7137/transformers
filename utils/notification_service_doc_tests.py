@@ -376,5 +376,5 @@ if __name__ == "__main__":
                         break
 
     message = Message("🤗 Results of the doc tests.", doc_test_results)
-    message.post()
+    Message.error_out()
     message.post_reply()

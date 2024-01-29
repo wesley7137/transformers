@@ -24,7 +24,7 @@ import subprocess
 import sys
 
 
-fork_point_sha = subprocess.check_output("git merge-base main HEAD".split()).decode("utf-8")
+fork_point_sha = subprocess.check_output(subprocess.check_output(["git", "rev-parse", "--verify", "refs/remotes/origin/main"]).decode("utf-8")) # changed from merge-base main HEAD to resolve the issue("git merge-base main HEAD".split()).decode("utf-8")
 modified_files = (
     subprocess.check_output(f"git diff --diff-filter=d --name-only {fork_point_sha}".split()).decode("utf-8").split()
 )
@@ -32,5 +32,8 @@ modified_files = (
 joined_dirs = "|".join(sys.argv[1:])
 regex = re.compile(rf"^({joined_dirs}).*?\.py$")
 
-relevant_modified_files = [x for x in modified_files if regex.match(x)]
+try:
+    relevant_modified_files = [x for x in modified_files if regex.match(x)]
+except Exception as e:
+    print(f"Error occurred while getting modified files: {e}")
 print(" ".join(relevant_modified_files), end="")
