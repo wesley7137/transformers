@@ -14,7 +14,7 @@ logger = logging.get_logger(__name__)
 
 def extract_warnings_from_single_artifact(artifact_path, targets):
     """Extract warnings from a downloaded artifact (in .zip format)"""
-    selected_warnings = set()
+    selected_warnings = []
     buffer = []
 
     def parse_line(fp):
@@ -71,7 +71,7 @@ def extract_warnings(artifact_dir, targets):
 
     paths = [os.path.join(artifact_dir, p) for p in os.listdir(artifact_dir) if (p.endswith(".zip") or from_gh)]
     for p in paths:
-        selected_warnings.update(extract_warnings_from_single_artifact(p, targets))
+        selected_warnings.extend(extract_warnings_from_single_artifact(p, targets))
 
     return selected_warnings
 
