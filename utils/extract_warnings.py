@@ -94,7 +94,7 @@ if __name__ == "__main__":
     # optional parameters
     parser.add_argument(
         "--targets",
-        default="DeprecationWarning,UserWarning,FutureWarning",
+        default="DeprecationWarning,UserWarning,FutureWarning,SpecificWarning1,SpecificWarning2",
         type=list_str,
         help="Comma-separated list of target warning(s) which we want to extract.",
     )
@@ -132,3 +132,8 @@ if __name__ == "__main__":
     selected_warnings = sorted(selected_warnings)
     with open(os.path.join(args.output_dir, "selected_warnings.json"), "w", encoding="UTF-8") as fp:
         json.dump(selected_warnings, fp, ensure_ascii=False, indent=4)
+selected_warnings = extract_warnings(args.output_dir, args.targets)
+selected_warnings = [warning for warning in selected_warnings if any(x in warning for x in args.targets)]
+selected_warnings = sorted(selected_warnings)
+with open(os.path.join(args.output_dir, "selected_warnings.json"), "w", encoding="UTF-8") as fp:
+    json.dump(selected_warnings, fp, ensure_ascii=False, indent=4)
