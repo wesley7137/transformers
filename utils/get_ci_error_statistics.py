@@ -6,6 +6,7 @@ import time
 import traceback
 import zipfile
 from collections import Counter
+from typing import Optional, Dict, List, Tuple
 
 import requests
 
