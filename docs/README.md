@@ -58,10 +58,10 @@ To preview the docs, first install the `watchdog` module with:
 pip install watchdog
 ```
 
-Then run the following command:
+To preview the documentation, run the following command:
 
 ```bash
-doc-builder preview {package_name} {path_to_docs}
+doc-builder preview transformers docs/source/en/
 ```
 
 For example:
@@ -136,7 +136,9 @@ When translating, refer to the guide at [./TRANSLATING.md](https://github.com/hu
 
 ### Adding a new model
 
-When adding a new model:
+## Adding a new model
+
+Have a new model to add? These are the steps you'll need to follow:
 
 - Create a file `xxx.md` or under `./source/model_doc` (don't hesitate to copy an existing file as template).
 - Link that file in `./source/_toctree.yml`.
@@ -388,7 +390,7 @@ pytest --doctest-modules docs/source/quicktour.md -sv --doctest-continue-on-fail
 
 ### Writing doctests
 
-Here are a few tips to help you debug the doctests and make them pass:
+Here are a few tips to help you debug and make the doctests pass:
 
 - The outputs of the code need to match the expected output **exactly**, so make sure you have the same outputs. In particular doctest will see a difference between single quotes and double quotes, or a missing parenthesis. The only exceptions to that rule are:
   * whitespace: one give whitespace (space, tabulation, new line) is equivalent to any number of whitespace, so you can add new lines where there are spaces to make your output more readable.
