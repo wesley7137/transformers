@@ -228,10 +228,11 @@ if __name__ == "__main__":
 
     os.makedirs(args.output_dir, exist_ok=True)
 
+    from utils.logger import Logger
+    logger = Logger()
+
     _job_links = get_job_links(args.workflow_run_id, token=args.token)
     job_links = {}
-    # To deal with `workflow_call` event, where a job name is the combination of the job names in the caller and callee.
-    # For example, `PyTorch 1.11 / Model tests (models/albert, single-gpu)`.
     if _job_links:
         for k, v in _job_links.items():
             # This is how GitHub actions combine job names.
@@ -242,6 +243,7 @@ if __name__ == "__main__":
     with open(os.path.join(args.output_dir, "job_links.json"), "w", encoding="UTF-8") as fp:
         json.dump(job_links, fp, ensure_ascii=False, indent=4)
 
+    logger.info("Getting artifact links.")
     artifacts = get_artifacts_links(args.workflow_run_id, token=args.token)
     with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="UTF-8") as fp:
         json.dump(artifacts, fp, ensure_ascii=False, indent=4)
