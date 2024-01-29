@@ -29,6 +29,15 @@ def get_job_links(workflow_run_id, token=None):
             result = requests.get(url + f"&page={i + 2}", headers=headers).json()
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
+        # To deal with `workflow_call` event, where a job name is the combination of the job names in the caller and callee.
+        # For example, `PyTorch 1.11 / Model tests (models/albert, single-gpu)`.
+        if job_links:
+            for k, v in job_links.items():
+                if " / " in k:
+                    index = k.find(" / ")
+                    k = k[index + len(" / ") :]
+                job_links[k] = v
+
         return job_links
     except Exception:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
@@ -73,12 +82,10 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     if token is not None:
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
-    result = requests.get(artifact_url, headers=headers, allow_redirects=False)
-    download_url = result.headers["Location"]
-    response = requests.get(download_url, allow_redirects=True)
+    result = requests.get(artifact_url, headers=headers, allow_redirects=True)
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
     with open(file_path, "wb") as fp:
-        fp.write(response.content)
+        fp.write(result.content)
 
 
 def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
@@ -114,6 +121,18 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
     if len(errors) != len(failed_tests):
         raise ValueError(
             f"`errors` and `failed_tests` should have the same number of elements. Got {len(errors)} for `errors` "
+            f"and {len(failed_tests)} for `failed_tests` instead. The test reports in {artifact_zip_path} have some"
+            " problem."
+        )
+    
+    job_link = None
+    if job_name and job_links:
+        job_link = job_links.get(job_name, None)
+    
+    # A list with elements of the form (line of error, error, failed test)
+    result = [x + [y] + [job_link] for x, y in zip(errors, failed_tests)]
+    
+    return result
             f"and {len(failed_tests)} for `failed_tests` instead. The test reports in {artifact_zip_path} have some"
             " problem."
         )
