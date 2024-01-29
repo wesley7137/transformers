@@ -266,7 +266,7 @@ if __name__ == "__main__":
         json.dump(errors, fp, ensure_ascii=False, indent=4)
 
     reduced_by_error = reduce_by_error(errors)
-    reduced_by_model = reduce_by_model(errors)
+    reduced_by_model, major_error = reduce_by_model(errors)
 
     s1 = make_github_table(reduced_by_error)
     s2 = make_github_table_per_model(reduced_by_model)
