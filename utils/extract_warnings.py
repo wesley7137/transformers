@@ -82,6 +82,8 @@ if __name__ == "__main__":
         return values.split(",")
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
+    parser.add_argument("--from_gh", action="store_true", help="If running from a GitHub action workflow and collecting warnings from its artifacts.")
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
     parser.add_argument(
