@@ -167,7 +167,7 @@ def get_model(test):
 
 
 def reduce_by_model(logs, error_filter=None):
-    """count each error per model"""
+    """Count errors from all artifact files"""
 
     logs = [(x[0], x[1], get_model(x[2])) for x in logs]
     logs = [x for x in logs if x[2] is not None]
