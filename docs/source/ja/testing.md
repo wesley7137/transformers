@@ -75,6 +75,10 @@ python -m pytest -n auto --dist=loadfile -s -v ./tests/
 - テストプロセスをCPUコアの数と同じだけ実行するように指示します。ただし、RAMが十分でない場合は注意が必要です。
 - 同じファイルからのすべてのテストは、同じテストプロセスで実行されるようにします。
 - 出力のキャプチャを行いません。
+```console
+Specific error logs for the failing GitHub Actions run:
+Add error logs here
+```
 - 冗長モードで実行します。
 
 
@@ -1099,7 +1103,9 @@ from transformers.testing_utils import TestCasePlus
 class EnvExampleTest(TestCasePlus):
     def test_external_prog(self):
         env = self.get_env()
-        # now call the external program, passing `env` to it
+        # Add error log of the failing GitHub Actions run
+# Specific error logs for the failing GitHub Actions run:
+Add error logs here
 ```
 
 テストファイルが `tests` テストスイートまたは `examples` のどちらにあるかに応じて
@@ -1138,10 +1144,18 @@ np.random.seed(seed)
 
 # tf RNG
 tf.random.set_seed(seed)
-```
+```yaml
+# Specific error logs for the failing GitHub Actions run:
+Add error logs here
 
 
 ### Debugging tests
+
+Error logs for the failing GitHub Actions run:
+
+```bash
+# Add the specific error logs for the failing GitHub Actions run here
+```
 
 警告が発生した時点でデバッガーを開始するには、次の手順を実行します。
 
