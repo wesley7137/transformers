@@ -12,6 +12,7 @@ You can directly update a model card inside any model repo you have **write acce
 You can either:
 - update it, commit and push using your usual git workflow (command line, GUI, etc.)
 - or edit it directly from the website's UI.
+  - Include the error logs or any relevant error messages.
 
 **What if you want to create or update a model card for a model you don't have write access to?**
 
