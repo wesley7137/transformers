@@ -5,6 +5,7 @@ import os
 import time
 import traceback
 import zipfile
+import argparse, json, math, os, time, traceback, zipfile
 from collections import Counter
 
 import requests
@@ -188,7 +189,7 @@ def reduce_by_model(logs, error_filter=None):
     return r
 
 
-def make_github_table(reduced_by_error):
+def make_github_table(reduced_by_error) -> str:
     header = "| no. | error | status |"
     sep = "|-:|:-|:-|"
     lines = [header, sep]
@@ -269,9 +270,10 @@ if __name__ == "__main__":
     reduced_by_model = reduce_by_model(errors)
 
     s1 = make_github_table(reduced_by_error)
-    s2 = make_github_table_per_model(reduced_by_model)
+    s2 = make_github_table_per_model(reduced_by_model) if reduced_by_model else ''
 
     with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s1)
-    with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
-        fp.write(s2)
+    if s2:
+        with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
+            fp.write(s2)
