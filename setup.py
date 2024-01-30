@@ -67,12 +67,23 @@ To create the package for pypi.
 9. Copy the release notes from RELEASE.md to the tag in github once everything is looking hunky-dory.
 """
 
+from setuptools import Command, find_packages, setup
 import os
 import re
 import shutil
 from pathlib import Path
+import requests
+import json
+import requests
+import json
 
 from setuptools import Command, find_packages, setup
+import os
+import re
+import shutil
+from pathlib import Path
+import requests
+import json
 
 
 # Remove stale transformers.egg-info directory to avoid https://github.com/pypa/pip/issues/5466
@@ -152,7 +163,7 @@ _deps = [
     "python>=3.8.0",
     "ray[tune]",
     "regex!=2019.12.17",
-    "requests",
+    "requests", "watchdog", "pygithub", "watchdog",
     "rhoknp>=1.1.0,<1.3.1",
     "rjieba",
     "rouge-score!=0.0.7,!=0.0.8,!=0.1,!=0.1.1",
@@ -442,7 +453,11 @@ setup(
     include_package_data=True,
     package_data={"": ["**/*.cu", "**/*.cpp", "**/*.cuh", "**/*.h", "**/*.pyx"]},
     zip_safe=False,
-    extras_require=extras,
+    extras_require=extras + [
+        "requests",
+        "watchdog",
+        "pygithub",
+    ],
     entry_points={"console_scripts": ["transformers-cli=transformers.commands.transformers_cli:main"]},
     python_requires=">=3.8.0",
     install_requires=list(install_requires),
