@@ -22,16 +22,18 @@ def get_job_links(workflow_run_id, token=None):
     job_links = {}
 
     try:
-        job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
-        pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
+        if "jobs" in result:
+            job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
+        pages_to_iterate_over = math.ceil((result.get("total_count", 0) - 100) / 100)
 
         for i in range(pages_to_iterate_over):
             result = requests.get(url + f"&page={i + 2}", headers=headers).json()
-            job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
+            if "jobs" in result:
+                job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    except Exception as e:
+        print(f"Error fetching job links:\n{str(e)}")
 
     return {}
 
@@ -48,16 +50,18 @@ def get_artifacts_links(worflow_run_id, token=None):
     artifacts = {}
 
     try:
-        artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
-        pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
+        if "artifacts" in result:
+            artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
+        pages_to_iterate_over = math.ceil((result.get("total_count", 0) - 100) / 100)
 
         for i in range(pages_to_iterate_over):
             result = requests.get(url + f"&page={i + 2}", headers=headers).json()
-            artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
+            if "artifacts" in result:
+                artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
         return artifacts
-    except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+    except Exception as e:
+        print(f"Error fetching artifact links:\n{str(e)}")
 
     return {}
 
@@ -66,6 +70,8 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
     """Download a GitHub Action artifact from a URL.
 
     The URL is of the form `https://api.github.com/repos/huggingface/transformers/actions/artifacts/{ARTIFACT_ID}/zip`,
+    but it can't be used to download directly. We need to get a redirect URL first.
+    See https://docs.github.com/en/rest/actions/artifacts#download-an-artifact
     but it can't be used to download directly. We need to get a redirect URL first.
     See https://docs.github.com/en/rest/actions/artifacts#download-an-artifact
     """
