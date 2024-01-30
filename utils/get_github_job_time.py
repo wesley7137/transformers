@@ -38,6 +38,7 @@ def get_job_time(workflow_run_id, token=None):
     job_time = {}
 
     try:
+        
         job_time.update({job["name"]: extract_time_from_single_job(job) for job in result["jobs"]})
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
