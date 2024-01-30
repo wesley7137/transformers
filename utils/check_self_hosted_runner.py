@@ -1,4 +1,6 @@
 import argparse
+import requests
+import json
 import json
 import subprocess
 
@@ -10,7 +12,7 @@ def get_runner_status(target_runners, token):
         f'curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer {token}"'
         " https://api.github.com/repos/huggingface/transformers/actions/runners"
     )
-    output = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE)
+    output = subprocess.check_output(cmd, shell=True).decode('utf-8')
     o = output.stdout.decode("utf-8")
     status = json.loads(o)
 
