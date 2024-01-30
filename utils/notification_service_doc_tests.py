@@ -277,7 +277,7 @@ def get_job_links():
 
         return jobs
     except Exception as e:
-        print("Unknown error, could not fetch links.", e)
+        print(f"Unknown error, could not fetch links: {str(e)}")
 
     return {}
 
@@ -355,7 +355,7 @@ if __name__ == "__main__":
         doc_test_results["success"] = success
         doc_test_results["time_spent"] = time_spent[1:-1] + ", "
 
-        all_failures = extract_first_line_failure(artifact["failures_short"])
+        all_failures = extract_first_line_failure(artifact.get("failures_short", ""))
         for line in artifact["summary_short"].split("\n"):
             if re.search("FAILED", line):
                 line = line.replace("FAILED ", "")
