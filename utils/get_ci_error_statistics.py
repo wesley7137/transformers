@@ -23,7 +23,7 @@ def get_job_links(workflow_run_id, token=None):
 
     try:
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
-        pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
+        pages_to_iterate_over = math.ceil(max(result["total_count"], 0) / 100)
 
         for i in range(pages_to_iterate_over):
             result = requests.get(url + f"&page={i + 2}", headers=headers).json()
@@ -128,7 +128,7 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
     return result
 
 
-def get_all_errors(artifact_dir, job_links=None):
+def get_all_errors(artifact_dir, job_links=None, from_gh=False):
     """Extract errors from all artifact files"""
 
     errors = []
