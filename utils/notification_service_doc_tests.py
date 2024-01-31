@@ -36,7 +36,7 @@ def handle_test_results(test_results):
 
     # When the output is short enough, the output is surrounded by = signs: "== OUTPUT =="
     # When it is too long, those signs are not present.
-    time_spent = expressions[-2] if "=" in expressions[-1] else expressions[-1]
+    time_spent = expressions[-2] if "=" in expressions[-2] else expressions[-1]
 
     for i, expression in enumerate(expressions):
         if "failed" in expression:
@@ -52,7 +52,7 @@ def extract_first_line_failure(failures_short_lines):
     file = None
     in_error = False
     for line in failures_short_lines.split("\n"):
-        if re.search(r"_ \[doctest\]", line):
+        if not line.split(" ")[0].isdigit():
             in_error = True
             file = line.split(" ")[2]
         elif in_error and not line.split(" ")[0].isdigit():
@@ -73,6 +73,7 @@ class Message:
 
         # Failures and success of the modeling tests
         self.doc_test_results = doc_test_results
+        self.has_failures = True if self.n_failures > 0 else False
 
     @property
     def time(self) -> str:
@@ -167,7 +168,7 @@ class Message:
         if self.n_failures > 0:
             blocks.extend([self.category_failures])
 
-        if self.n_failures == 0:
+        if self.has_failures == False:
             blocks.append(self.no_failures)
 
         return json.dumps(blocks)
@@ -233,7 +234,7 @@ class Message:
         ]
 
     def post_reply(self):
-        if self.thread_ts is None:
+        if self.thread_ts is None or not self.thread_ts:
             raise ValueError("Can only post reply if a post has been made.")
 
         job_link = self.doc_test_results.pop("job_link")
