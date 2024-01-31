@@ -98,8 +98,8 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
                             if filename == "failures_line.txt":
                                 try:
                                     # `error_line` is the place where `error` occurs
-                                    error_line = line[: line.index(": ")]
-                                    error = line[line.index(": ") + len(": ") :]
+                                    error_line = line.split(":")[0]
+                                    error = ":".join(line.split(": ")[1:]).strip()
                                     errors.append([error_line, error])
                                 except Exception:
                                     # skip un-related lines
@@ -224,7 +224,7 @@ if __name__ == "__main__":
         help="Where to store the downloaded artifacts and other result files.",
     )
     parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
-    args = parser.parse_args()
+    args, unparsed_args = parser.parse_known_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
 
