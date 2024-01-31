@@ -30,7 +30,7 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                     warning = "\n".join(buffer)
                     # Only keep the warnings specified in `targets`
                     if any(f": {x}: " in warning for x in targets):
-                        selected_warnings.add(warning)
+                        buffer.append(warning)
                     buffer.clear()
                 continue
             else:
@@ -71,7 +71,7 @@ def extract_warnings(artifact_dir, targets):
 
     paths = [os.path.join(artifact_dir, p) for p in os.listdir(artifact_dir) if (p.endswith(".zip") or from_gh)]
     for p in paths:
-        selected_warnings.update(extract_warnings_from_single_artifact(p, targets))
+        selected_warnings.update({f'calling_callee_name': extract_warnings_from_single_artifact(p, targets)})
 
     return selected_warnings
 
