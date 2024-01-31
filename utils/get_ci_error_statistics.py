@@ -30,7 +30,7 @@ def get_job_links(workflow_run_id, token=None):
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
-    except Exception:
+    except Exception as e:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
@@ -101,9 +101,9 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
                                     error_line = line[: line.index(": ")]
                                     error = line[line.index(": ") + len(": ") :]
                                     errors.append([error_line, error])
-                                except Exception:
+                                except Exception as e:
                                     # skip un-related lines
-                                    pass
+                                    print(f'Skipped un-related lines:\n{line}')
                             elif filename == "summary_short.txt" and line.startswith("FAILED "):
                                 # `test` is the test method that failed
                                 test = line[len("FAILED ") :]
