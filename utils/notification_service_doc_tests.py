@@ -43,6 +43,11 @@ def handle_test_results(test_results):
             failed += int(expressions[i - 1])
         if "passed" in expression:
             success += int(expressions[i - 1])
+        if "calling_callee_name" in expression:
+            callee_name = expressions[i - 1]
+            caller_name = expressions[i - 3]
+            job_name = f"{caller_name}_{callee_name}"
+            return failed, success, time_spent, job_name
 
     return failed, success, time_spent
 
