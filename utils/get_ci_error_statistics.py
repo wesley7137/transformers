@@ -18,7 +18,11 @@ def get_job_links(workflow_run_id, token=None):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
-    result = requests.get(url, headers=headers).json()
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        print(f'Failed to get job links. Status code: {response.status_code}')
+        return {} 
+    result = response.json()
     job_links = {}
 
     try:
@@ -216,7 +220,7 @@ def make_github_table_per_model(reduced_by_model):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # Required parameters
-    parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
+    parser.add_argument("workflow_run_id", help="A GitHub Actions workflow run id.")
     parser.add_argument(
         "--output_dir",
         type=str,
@@ -226,7 +230,10 @@ if __name__ == "__main__":
     parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
     args = parser.parse_args()
 
-    os.makedirs(args.output_dir, exist_ok=True)
+    try:
+        os.makedirs(args.output_dir, exist_ok=True)
+    except Exception as e:
+        print(f"Error creating directory: {str(e)}")
 
     _job_links = get_job_links(args.workflow_run_id, token=args.token)
     job_links = {}
