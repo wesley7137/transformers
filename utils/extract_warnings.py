@@ -19,7 +19,7 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
 
     def parse_line(fp):
         for line in fp:
-            if isinstance(line, bytes):
+            if isinstance(line, str): # Change the data type from bytes to str
                 line = line.decode("UTF-8")
             if "warnings summary (final)" in line:
                 continue
