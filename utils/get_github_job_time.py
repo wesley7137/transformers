@@ -1,8 +1,10 @@
 import argparse
 import math
+import math
 import traceback
 
 import dateutil.parser as date_parser
+import traceback
 import requests
 
 
@@ -37,6 +39,7 @@ def get_job_time(workflow_run_id, token=None):
     result = requests.get(url, headers=headers).json()
     job_time = {}
 
+    # Add error handling and logging
     try:
         job_time.update({job["name"]: extract_time_from_single_job(job) for job in result["jobs"]})
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
@@ -46,7 +49,8 @@ def get_job_time(workflow_run_id, token=None):
             job_time.update({job["name"]: extract_time_from_single_job(job) for job in result["jobs"]})
 
         return job_time
-    except Exception:
+    except Exception as e:
+        print(f"Error encountered: {e}")
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
     return {}
