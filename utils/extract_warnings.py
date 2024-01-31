@@ -37,7 +37,12 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                 line = line.strip()
                 buffer.append(line)
 
-    if from_gh:
+    for filename in os.listdir(artifact_path):   
+        file_path = os.path.join(artifact_path, filename)   
+        if filename != "warnings.txt":
+            continue   
+        with open(file_path) as fp:       
+            parse_line(fp)
         for filename in os.listdir(artifact_path):
             file_path = os.path.join(artifact_path, filename)
             if not os.path.isdir(file_path):
@@ -81,7 +86,7 @@ if __name__ == "__main__":
     def list_str(values):
         return values.split(",")
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='Handle GitHub Actions artifacts') if from_gh else argparse.ArgumentParser()
     # Required parameters
     parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
     parser.add_argument(
