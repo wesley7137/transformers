@@ -224,7 +224,18 @@ if __name__ == "__main__":
         help="Where to store the downloaded artifacts and other result files.",
     )
     parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
+    from utils.get_ci_error_logs import get_job_links
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--workflow_run_id", type=str, required=True, help="A GitHub Actions workflow run id.")
+    parser.add_argument("--output_dir", type=str, required=True, help="Where to store the downloaded artifacts and other result files.")
+    parser.add_argument("--token", default=None, type=str, help="A token that has actions:read permission.")
     args = parser.parse_args()
+    if args.token is not None:
+        _job_links = get_job_links(args.workflow_run_id, token=args.token)
+        job_links = {}
+    os.makedirs(args.output_dir, exist_ok=True)
 
     os.makedirs(args.output_dir, exist_ok=True)
 
