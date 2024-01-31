@@ -32,7 +32,7 @@ def get_job_links(workflow_run_id, token=None):
 
         return job_links
     except Exception:
-        print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
+        print(f"Error fetching links:\n{traceback.format_exc()}")
 
     return {}
 
