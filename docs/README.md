@@ -323,7 +323,10 @@ includes an example of how to transcribe speech to text in the
 The syntax for Example docstrings can look as follows:
 
 ```
-    Example:
+    ```python
+    >>> # Add your code snippet here
+    >>> # Add your code snippet here
+    ```
 
     ```python
     >>> from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
