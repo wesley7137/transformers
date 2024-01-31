@@ -18,7 +18,7 @@ def get_job_links(workflow_run_id, token=None):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
-    result = requests.get(url, headers=headers).json()
+    result = requests.get(url, headers=headers).json() if result.ok else {'jobs': [], 'total_count': 0}
     job_links = {}
 
     try:
@@ -26,7 +26,7 @@ def get_job_links(workflow_run_id, token=None):
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
         for i in range(pages_to_iterate_over):
-            result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+            result = requests.get(url + f"&page={i + 2}", headers=headers).json() if result.ok else {'jobs': []}
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
         return job_links
@@ -44,7 +44,7 @@ def get_artifacts_links(worflow_run_id, token=None):
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"}
 
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{worflow_run_id}/artifacts?per_page=100"
-    result = requests.get(url, headers=headers).json()
+    result = requests.get(url, headers=headers).json() if result.ok else {'artifacts': [], 'total_count': 0}
     artifacts = {}
 
     try:
@@ -52,7 +52,7 @@ def get_artifacts_links(worflow_run_id, token=None):
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
         for i in range(pages_to_iterate_over):
-            result = requests.get(url + f"&page={i + 2}", headers=headers).json()
+            result = requests.get(url + f"&page={i + 2}", headers=headers).json() if result.ok else {'artifacts': []}
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
         return artifacts
@@ -169,7 +169,7 @@ def get_model(test):
 def reduce_by_model(logs, error_filter=None):
     """count each error per model"""
 
-    logs = [(x[0], x[1], get_model(x[2])) for x in logs]
+    logs = [(x[0], x[1], get_model(x[2])) for x in logs if get_model(x[2]) is not None]
     logs = [x for x in logs if x[2] is not None]
     tests = {x[2] for x in logs}
 
