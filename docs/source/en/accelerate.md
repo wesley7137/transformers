@@ -1,4 +1,6 @@
-<!--Copyright 2022 The HuggingFace Team. All rights reserved.
+#### Troubleshooting GitHub Actions Runs
+
+If your GitHub Actions runs are failing, this section provides guidelines on how to analyze error logs and make necessary changes to fix the issues.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 the License. You may obtain a copy of the License at
