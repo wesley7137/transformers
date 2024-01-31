@@ -4,7 +4,7 @@ import os
 import time
 import zipfile
 
-from get_ci_error_statistics import download_artifact, get_artifacts_links
+from get_ci_error_statistics import download_artifact, get_artifacts_links, get_job_links
 
 from transformers import logging
 
@@ -19,7 +19,7 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
 
     def parse_line(fp):
         for line in fp:
-            if isinstance(line, bytes):
+            if isinstance(line, str): # Change the data type from bytes to str
                 line = line.decode("UTF-8")
             if "warnings summary (final)" in line:
                 continue
