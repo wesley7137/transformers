@@ -1,4 +1,4 @@
-import argparse
+from utils.error_handling import (handle_error, generate_error_report, send_notification, mock_notification_service, get_current_timestamp, get_stack_traceimport argparse
 import json
 import math
 import os
@@ -230,6 +230,18 @@ if __name__ == "__main__":
 
     _job_links = get_job_links(args.workflow_run_id, token=args.token)
     job_links = {}
+    try:
+        job_links.update({job['name']: job['html_url'] for job in result['jobs']})
+    except Exception as e:
+        error_message = f'Failed to fetch job links: {str(e)}'
+        handle_error(error_message)
+        job_links = {}
+    try:
+        with open(os.path.join(args.output_dir, "job_links.json"), "w", encoding="UTF-8") as fp:
+            json.dump(job_links, fp, ensure_ascii=False, indent=4)
+    except Exception as e:
+        error_message = f'Failed to write job links to file: {str(e)}'
+        handle_error(error_message)
     # To deal with `workflow_call` event, where a job name is the combination of the job names in the caller and callee.
     # For example, `PyTorch 1.11 / Model tests (models/albert, single-gpu)`.
     if _job_links:
@@ -243,7 +255,19 @@ if __name__ == "__main__":
         json.dump(job_links, fp, ensure_ascii=False, indent=4)
 
     artifacts = get_artifacts_links(args.workflow_run_id, token=args.token)
+    try:
+        with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="UTF-8") as fp:
+            json.dump(artifacts, fp, ensure_ascii=False, indent=4)
+    except Exception as e:
+        error_message = f'Failed to write artifacts to file: {str(e)}'
+        handle_error(error_message)
     with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="UTF-8") as fp:
+    with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="UTF-8") as fp:
+        json.dump(artifacts, fp, ensure_ascii=False, indent=4)
+    with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="UTF-8") as fp:
+        json.dump(artifacts, fp, ensure_ascii=False, indent=4)
+    with open(os.path.join(args.output_dir, "artifacts.json"), "w", encoding="UTF-8") as fp:
+        json.dump(artifacts, fp, ensure_ascii=False, indent=4)
         json.dump(artifacts, fp, ensure_ascii=False, indent=4)
 
     for idx, (name, url) in enumerate(artifacts.items()):
@@ -263,6 +287,12 @@ if __name__ == "__main__":
         print(item)
 
     with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
+    with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
+        json.dump(errors, fp, ensure_ascii=False, indent=4)
+    with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
+        json.dump(errors, fp, ensure_ascii=False, indent=4)
+    with open(os.path.join(args.output_dir, "errors.json"), "w", encoding="UTF-8") as fp:
+        json.dump(errors, fp, ensure_ascii=False, indent=4)
         json.dump(errors, fp, ensure_ascii=False, indent=4)
 
     reduced_by_error = reduce_by_error(errors)
@@ -271,6 +301,18 @@ if __name__ == "__main__":
     s1 = make_github_table(reduced_by_error)
     s2 = make_github_table_per_model(reduced_by_model)
 
+    with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
+        fp.write(s1)
+    with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
+        fp.write(s2)
+    with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
+        fp.write(s1)
+    with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
+        fp.write(s2)
+    with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
+        fp.write(s1)
+    with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
+        fp.write(s2)
     with open(os.path.join(args.output_dir, "reduced_by_error.txt"), "w", encoding="UTF-8") as fp:
         fp.write(s1)
     with open(os.path.join(args.output_dir, "reduced_by_model.txt"), "w", encoding="UTF-8") as fp:
