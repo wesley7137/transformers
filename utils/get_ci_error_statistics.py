@@ -20,6 +20,7 @@ def get_job_links(workflow_run_id, token=None):
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{workflow_run_id}/jobs?per_page=100"
     result = requests.get(url, headers=headers).json()
     job_links = {}
+    _caller_callee = {}
 
     try:
         job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
@@ -29,7 +30,7 @@ def get_job_links(workflow_run_id, token=None):
             result = requests.get(url + f"&page={i + 2}", headers=headers).json()
             job_links.update({job["name"]: job["html_url"] for job in result["jobs"]})
 
-        return job_links
+        return {**job_links, **_caller_callee}
     except Exception:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
@@ -46,6 +47,7 @@ def get_artifacts_links(worflow_run_id, token=None):
     url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{worflow_run_id}/artifacts?per_page=100"
     result = requests.get(url, headers=headers).json()
     artifacts = {}
+    _caller_callee = {}
 
     try:
         artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
@@ -55,7 +57,7 @@ def get_artifacts_links(worflow_run_id, token=None):
             result = requests.get(url + f"&page={i + 2}", headers=headers).json()
             artifacts.update({artifact["name"]: artifact["archive_download_url"] for artifact in result["artifacts"]})
 
-        return artifacts
+        return {**artifacts, **_caller_callee}
     except Exception:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
@@ -75,7 +77,7 @@ def download_artifact(artifact_name, artifact_url, output_dir, token):
 
     result = requests.get(artifact_url, headers=headers, allow_redirects=False)
     download_url = result.headers["Location"]
-    response = requests.get(download_url, allow_redirects=True)
+    response = requests.get(download_url.replace(" / ", "_"), allow_redirects=True)
     file_path = os.path.join(output_dir, f"{artifact_name}.zip")
     with open(file_path, "wb") as fp:
         fp.write(response.content)
