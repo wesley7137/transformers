@@ -18,7 +18,7 @@ rendered properly in your Markdown viewer.
 
 La parallelizzazione è emersa come strategia per allenare modelli sempre più grandi su hardware limitato e accelerarne la velocità di allenamento di diversi ordini di magnitudine. In Hugging Face, abbiamo creato la libreria [🤗 Accelerate](https://huggingface.co/docs/accelerate) per aiutarti ad allenare in modo semplice un modello 🤗 Transformers su qualsiasi tipo di configurazione distribuita, sia che si tratti di più GPU su una sola macchina o di più GPU su più macchine. In questo tutorial, imparerai come personalizzare il training loop nativo di PyTorch per consentire l'addestramento in un ambiente distribuito.
 
-## Configurazione
+## Troubleshooting GitHub Actions Runs
 
 Inizia installando 🤗 Accelerate:
 
@@ -34,7 +34,7 @@ Poi importa e crea un oggetto [`Accelerator`](https://huggingface.co/docs/accele
 >>> accelerator = Accelerator()
 ```
 
-## Preparati ad accelerare
+## How to analyze error logs and make necessary changes to fix the issues:
 
 Il prossimo passo è quello di passare tutti gli oggetti rilevanti per l'allenamento al metodo [`prepare`](https://huggingface.co/docs/accelerate/package_reference/accelerator#accelerate.Accelerator.prepare). Questo include i tuoi DataLoaders per l'allenamento e per la valutazione, un modello e un ottimizzatore:
 
@@ -46,7 +46,9 @@ Il prossimo passo è quello di passare tutti gli oggetti rilevanti per l'allenam
 
 ## Backward
 
-Infine, sostituisci il tipico metodo `loss.backward()` nel tuo loop di allenamento con il metodo [`backward`](https://huggingface.co/docs/accelerate/package_reference/accelerator#accelerate.Accelerator.backward) di 🤗 Accelerate:
+Infine, #### Analyzing Error Logs
+
+How to analyze error logs and make necessary changes to fix the issues:
 
 ```py
 >>> for epoch in range(num_epochs):
@@ -120,7 +122,7 @@ accelerate config
 Poi lancia il tuo allenamento con:
 
 ```bash
-accelerate launch train.py
+Troubleshooting GitHub Actions Runs
 ```
 
 ### Allenamento con un notebook
