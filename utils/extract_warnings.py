@@ -14,7 +14,7 @@ logger = logging.get_logger(__name__)
 
 def extract_warnings_from_single_artifact(artifact_path, targets):
     """Extract warnings from a downloaded artifact (in .zip format)"""
-    selected_warnings = set()
+    selected_warnings = []
     buffer = []
 
     def parse_line(fp):
@@ -37,7 +37,7 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                 line = line.strip()
                 buffer.append(line)
 
-    if from_gh:
+    if args.from_gh:
         for filename in os.listdir(artifact_path):
             file_path = os.path.join(artifact_path, filename)
             if not os.path.isdir(file_path):
@@ -56,7 +56,7 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
                             continue
                         with z.open(filename) as fp:
                             parse_line(fp)
-        except Exception:
+        except Exception as e:
             logger.warning(
                 f"{artifact_path} is either an invalid zip file or something else wrong. This file is skipped."
             )
