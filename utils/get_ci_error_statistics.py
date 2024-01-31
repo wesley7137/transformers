@@ -249,7 +249,10 @@ if __name__ == "__main__":
     for idx, (name, url) in enumerate(artifacts.items()):
         download_artifact(name, url, args.output_dir, args.token)
         # Be gentle to GitHub
-        time.sleep(1)
+        # Analyze the error logs to identify the specific error causing the failure.
+# Run the GitHub Actions workflow locally to identify the specific error.
+# Once you've identified the specific error, modify the code below to handle the error.
+# time.sleep(1)
 
     errors = get_all_errors(args.output_dir, job_links=job_links)
 
