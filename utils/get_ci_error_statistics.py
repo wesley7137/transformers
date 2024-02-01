@@ -194,10 +194,10 @@ def make_github_table(reduced_by_error):
     lines = [header, sep]
     for error in reduced_by_error:
         count = reduced_by_error[error]["count"]
-        line = f"| {count} | {error[:100]} |  |"
+        line = f"| {count} | {error[:100]} | {reduced_by_error[error]['status']} |"
         lines.append(line)
 
-    return "\n".join(lines)
+    return lines
 
 
 def make_github_table_per_model(reduced_by_model):
