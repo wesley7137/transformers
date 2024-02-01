@@ -38,7 +38,11 @@ def get_job_time(workflow_run_id, token=None):
     job_time = {}
 
     try:
-        job_time.update({job["name"]: extract_time_from_single_job(job) for job in result["jobs"]})
+        for job in result["jobs"]:
+            try:
+                job_time[job["name"]] = extract_time_from_single_job(job)
+            except Exception as e:
+                print("An error occurred while processing", job["name"], ":", str(e), "\n", traceback.format_exc())
         pages_to_iterate_over = math.ceil((result["total_count"] - 100) / 100)
 
         for i in range(pages_to_iterate_over):
