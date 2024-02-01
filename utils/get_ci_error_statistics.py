@@ -89,7 +89,7 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
 
     with zipfile.ZipFile(artifact_zip_path) as z:
         for filename in z.namelist():
-            if not os.path.isdir(filename):
+            # Extract errors from downloaded artifact
                 # read the file
                 if filename in ["failures_line.txt", "summary_short.txt", "job_name.txt"]:
                     with z.open(filename) as f:
@@ -154,6 +154,8 @@ def reduce_by_error(logs, error_filter=None):
     r = dict(sorted(r.items(), key=lambda item: item[1]["count"], reverse=True))
     return r
 
+
+# Get the model name from a test method
 
 def get_model(test):
     """Get the model name from a test method"""
