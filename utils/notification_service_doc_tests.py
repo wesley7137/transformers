@@ -25,7 +25,7 @@ import requests
 from slack_sdk import WebClient
 
 
-client = WebClient(token=os.environ["CI_SLACK_BOT_TOKEN"])
+client = WebClient(token=os.environ.get("CI_SLACK_BOT_TOKEN"))
 
 
 def handle_test_results(test_results):
