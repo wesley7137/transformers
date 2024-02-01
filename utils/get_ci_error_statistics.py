@@ -95,7 +95,7 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
                     with z.open(filename) as f:
                         for line in f:
                             line = line.decode("UTF-8").strip()
-                            if filename == "failures_line.txt":
+                            if 'failures_line.txt' in filename:
                                 try:
                                     # `error_line` is the place where `error` occurs
                                     error_line = line[: line.index(": ")]
@@ -123,7 +123,7 @@ def get_errors_from_single_artifact(artifact_zip_path, job_links=None):
         job_link = job_links.get(job_name, None)
 
     # A list with elements of the form (line of error, error, failed test)
-    result = [x + [y] + [job_link] for x, y in zip(errors, failed_tests)]
+    result = [x + [y, job_link] for x, y in zip(errors, failed_tests)]
 
     return result
 
