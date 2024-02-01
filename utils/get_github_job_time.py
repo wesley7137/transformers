@@ -26,7 +26,7 @@ def extract_time_from_single_job(job):
     return job_info
 
 
-def get_job_time(workflow_run_id, token=None):
+def get_job_time(workflow_run_id, token=None, from_gh=False):
     """Extract time info for all jobs in a GitHub Actions workflow run"""
 
     headers = None
@@ -49,7 +49,7 @@ def get_job_time(workflow_run_id, token=None):
     except Exception:
         print(f"Unknown error, could not fetch links:\n{traceback.format_exc()}")
 
-    return {}
+        return {}
 
 
 if __name__ == "__main__":
