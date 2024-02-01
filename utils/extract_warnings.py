@@ -36,6 +36,8 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
             else:
                 line = line.strip()
                 buffer.append(line)
+                if "DeprecationWarning" in line:
+                    selected_warnings.add(line)
 
     if from_gh:
         for filename in os.listdir(artifact_path):
@@ -66,7 +68,13 @@ def extract_warnings_from_single_artifact(artifact_path, targets):
 
 def extract_warnings(artifact_dir, targets):
     """Extract warnings from all artifact files"""
+    selected_warnings = set()
 
+    paths = [os.path.join(artifact_dir, p) for p in os.listdir(artifact_dir) if (p.endswith(".zip") or from_gh)]
+    for p in paths:
+        selected_warnings.update(extract_warnings_from_single_artifact(p, targets))
+
+    return selected_warnings
     selected_warnings = set()
 
     paths = [os.path.join(artifact_dir, p) for p in os.listdir(artifact_dir) if (p.endswith(".zip") or from_gh)]
