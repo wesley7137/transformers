@@ -1103,7 +1103,7 @@ class EnvExampleTest(TestCasePlus):
 ```
 
 テストファイルが `tests` テストスイートまたは `examples` のどちらにあるかに応じて
-`env[PYTHONPATH]` を使用して、これら 2 つのディレクトリのいずれかを含めます。また、テストが確実に行われるようにするための `src` ディレクトリも含めます。
+`env[PYTHOPATH]` を使用して、これら 2 つのディレクトリのいずれかを含めます。また、テストが確実に行われるようにするための `src` ディレクトリも含めます。
 現在のリポジトリに対して実行され、最後に、テストが実行される前にすでに設定されていた `env[PYTHONPATH]` を使用して実行されます。
 何かあれば呼ばれます。
 
@@ -1116,7 +1116,7 @@ class EnvExampleTest(TestCasePlus):
 シードを修正する必要があります:
 
 ```python
-seed = 42
+random_seed = 42
 
 # python RNG
 import random
@@ -1126,7 +1126,7 @@ random.seed(seed)
 # pytorch RNGs
 import torch
 
-torch.manual_seed(seed)
+torch.manual_seed(random_seed)
 torch.backends.cudnn.deterministic = True
 if torch.cuda.is_available():
     torch.cuda.manual_seed_all(seed)
@@ -1134,10 +1134,10 @@ if torch.cuda.is_available():
 # numpy RNG
 import numpy as np
 
-np.random.seed(seed)
+np.random.seed(random_seed)
 
 # tf RNG
-tf.random.set_seed(seed)
+tf.random.set_seed(random_seed)
 ```
 
 
@@ -1145,8 +1145,8 @@ tf.random.set_seed(seed)
 
 警告が発生した時点でデバッガーを開始するには、次の手順を実行します。
 
-```bash
-pytest tests/utils/test_logging.py -W error::UserWarning --pdb
+```
+pytest tests/utils/test_logging.py -W error --pdb
 ```
 
 ## Working with github actions workflows
@@ -1200,7 +1200,7 @@ TravisCIのような一部のCIは `ignore-step-failure` をサポートし、�
 単純なコマンドの場合は、次のようにすることもできます。
 
 ```bash
-cmd_that_may_fail || true
+cmd_that_may_fail
 ```
 
 もちろん、結果に満足したら、実験的なステップやジョブを通常のジョブと統合し、`set +euo pipefail` などの追加した要素を削除して、実験的なジョブが通常のCIの動作に干渉しないようにします。
