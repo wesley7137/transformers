@@ -165,7 +165,7 @@ class Message:
             blocks.append(self.failures)
 
         if self.n_failures > 0:
-            blocks.extend([self.category_failures])
+            blocks.append([self.category_failures])
 
         if self.n_failures == 0:
             blocks.append(self.no_failures)
@@ -349,7 +349,7 @@ if __name__ == "__main__":
 
     artifact_path = available_artifacts["doc_tests_gpu_test_reports"].paths[0]
     artifact = retrieve_artifact(artifact_path["name"])
-    if "stats" in artifact:
+    if "stats" in artifact and "failures_short" in artifact:
         failed, success, time_spent = handle_test_results(artifact["stats"])
         doc_test_results["failures"] = failed
         doc_test_results["success"] = success
